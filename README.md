@@ -21,7 +21,7 @@ Functionality (65 points)
 - 5 pieces that are taken are properly displayed on the side
 - 10 Users can register, login, logout
 - 10 User info stored in MySQL database (i.e. username, password, win-loss record, etc.)
-- 10 Games can be on a timer (No time, 10 min game, 20 min game, etc.)
+- 10 A timer can be assigned to each user for the game (No time, 10 min game, 20 min game, etc.) and user loses when their time runs out
 - 5 properly checks if game is over/in stalemate and updates users win-loss record
 - 5 Mobile friendly 
 
