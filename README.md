@@ -36,3 +36,4 @@ RICO FOLLOW THESE INSTRUCTIONS TO GET EVERYTHING SET UP ON YOUR END:
 
 - You'll need to update node on your web instance. Instructions to do this: https://phoenixnap.com/kb/update-node-js-version#ftoc-heading-3 (Second option for linux environment) You'll need to use sudo if you get permissions errors. 
 - Then you should be able to just pull the repository off github. 
+- Here's a page for integrating socket.io if you want to try to get that working: https://medium.com/@raj_36650/integrate-socket-io-with-node-js-express-2292ca13d891
