@@ -30,3 +30,9 @@ Best Practices (5 points)
 - 2 All pages pass the html validator
 
 Creative Portion (15 points)
+
+
+RICO FOLLOW THESE INSTRUCTIONS TO GET EVERYTHING SET UP ON YOUR END: 
+
+- You'll need to update node on your web instance. Instructions to do this: https://phoenixnap.com/kb/update-node-js-version#ftoc-heading-3 (Second option for linux environment) You'll need to use sudo if you get permissions errors. 
+- Then you should be able to just pull the repository off github. 
