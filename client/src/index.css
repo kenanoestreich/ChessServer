@@ -148,3 +148,7 @@ ol, ul {
 .horizontal {
   display: inline;
 }
+
+#root{
+  width:1000px;
+}
