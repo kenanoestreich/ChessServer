@@ -31,22 +31,24 @@ const blackPieces = [blackKing,blackQueen,blackRook,blackBishop,blackKnight,blac
 let pieceClickedRow; 
 let pieceClickedCol;
 
+const container = document.getElementById("root"); 
+const root = createRoot(container);
 
 function Square(props) {
   return (
-    <button className={props.squareColor} onClick={props.onClick} piece={props.piece}>
+    <button className={props.squareColor} onClick={props.onClick}>
       {props.value}
     </button>
   );
 }
 
 class Board extends React.Component {
-  renderSquare(i,j,misc) {
+  renderSquare(i,j,misc,squares) {
     if (misc==null){
-      if (((i+j)%2)==1){
+      if (((i+j)%2)===1){
         return (
           <Square
-            value={this.props.squares[i][j]}
+            value={squares[i][j]}
             onClick={() => this.props.onClick(i,j)}
             squareColor="darksquare"
           />
@@ -55,14 +57,14 @@ class Board extends React.Component {
       else {
         return (
           <Square
-            value={this.props.squares[i][j]}
+            value={squares[i][j]}
             onClick={() => this.props.onClick(i,j)}
             squareColor="lightsquare"
           />
         );
       }
     }
-    else if (misc=="selected"){
+    else if (misc==="selected"){
       return (
         <Square
           value={this.props.squares[i][j]}
@@ -71,7 +73,7 @@ class Board extends React.Component {
         />
       );
     }
-    else if (misc=="possible"){
+    else if (misc==="possible"){
       return (
         <Square
           value={this.props.squares[i][j]}
@@ -80,7 +82,7 @@ class Board extends React.Component {
         />
       );
     }
-    else if (misc=="threatened"){
+    else if (misc==="threatened"){
       return (
         <Square
           value={this.props.squares[i][j]}
@@ -91,90 +93,94 @@ class Board extends React.Component {
     }
   }
   
+  componentDidMount() {
+
+  }
 
   render() {
     const miscSquares = JSON.parse(JSON.stringify(this.props.miscSquares)); 
+    const squares = JSON.parse(JSON.stringify(this.props.squares));
     return (
       <div>
         <div className="board-row">
-          {this.renderSquare(0,0,miscSquares[0][0])}
-          {this.renderSquare(0,1,miscSquares[0][1])}
-          {this.renderSquare(0,2,miscSquares[0][2])}
-          {this.renderSquare(0,3,miscSquares[0][3])}
-          {this.renderSquare(0,4,miscSquares[0][4])}
-          {this.renderSquare(0,5,miscSquares[0][5])}
-          {this.renderSquare(0,6,miscSquares[0][6])}
-          {this.renderSquare(0,7,miscSquares[0][7])}
+          {this.renderSquare(0,0,miscSquares[0][0],squares)}
+          {this.renderSquare(0,1,miscSquares[0][1],squares)}
+          {this.renderSquare(0,2,miscSquares[0][2],squares)}
+          {this.renderSquare(0,3,miscSquares[0][3],squares)}
+          {this.renderSquare(0,4,miscSquares[0][4],squares)}
+          {this.renderSquare(0,5,miscSquares[0][5],squares)}
+          {this.renderSquare(0,6,miscSquares[0][6],squares)}
+          {this.renderSquare(0,7,miscSquares[0][7],squares)}
         </div>
         <div className="board-row">
-          {this.renderSquare(1,0,miscSquares[1][0])}
-          {this.renderSquare(1,1,miscSquares[1][1])}
-          {this.renderSquare(1,2,miscSquares[1][2])}
-          {this.renderSquare(1,3,miscSquares[1][3])}
-          {this.renderSquare(1,4,miscSquares[1][4])}
-          {this.renderSquare(1,5,miscSquares[1][5])}
-          {this.renderSquare(1,6,miscSquares[1][6])}
-          {this.renderSquare(1,7,miscSquares[1][7])}
+          {this.renderSquare(1,0,miscSquares[1][0],squares)}
+          {this.renderSquare(1,1,miscSquares[1][1],squares)}
+          {this.renderSquare(1,2,miscSquares[1][2],squares)}
+          {this.renderSquare(1,3,miscSquares[1][3],squares)}
+          {this.renderSquare(1,4,miscSquares[1][4],squares)}
+          {this.renderSquare(1,5,miscSquares[1][5],squares)}
+          {this.renderSquare(1,6,miscSquares[1][6],squares)}
+          {this.renderSquare(1,7,miscSquares[1][7],squares)}
         </div>
         <div className="board-row">
-          {this.renderSquare(2,0,miscSquares[2][0])}
-          {this.renderSquare(2,1,miscSquares[2][1])}
-          {this.renderSquare(2,2,miscSquares[2][2])}
-          {this.renderSquare(2,3,miscSquares[2][3])}
-          {this.renderSquare(2,4,miscSquares[2][4])}
-          {this.renderSquare(2,5,miscSquares[2][5])}
-          {this.renderSquare(2,6,miscSquares[2][6])}
-          {this.renderSquare(2,7,miscSquares[2][7])}
+          {this.renderSquare(2,0,miscSquares[2][0],squares)}
+          {this.renderSquare(2,1,miscSquares[2][1],squares)}
+          {this.renderSquare(2,2,miscSquares[2][2],squares)}
+          {this.renderSquare(2,3,miscSquares[2][3],squares)}
+          {this.renderSquare(2,4,miscSquares[2][4],squares)}
+          {this.renderSquare(2,5,miscSquares[2][5],squares)}
+          {this.renderSquare(2,6,miscSquares[2][6],squares)}
+          {this.renderSquare(2,7,miscSquares[2][7],squares)}
         </div>
         <div className="board-row">
-          {this.renderSquare(3,0,miscSquares[3][0])}
-          {this.renderSquare(3,1,miscSquares[3][1])}
-          {this.renderSquare(3,2,miscSquares[3][2])}
-          {this.renderSquare(3,3,miscSquares[3][3])}
-          {this.renderSquare(3,4,miscSquares[3][4])}
-          {this.renderSquare(3,5,miscSquares[3][5])}
-          {this.renderSquare(3,6,miscSquares[3][6])}
-          {this.renderSquare(3,7,miscSquares[3][7])}
+          {this.renderSquare(3,0,miscSquares[3][0],squares)}
+          {this.renderSquare(3,1,miscSquares[3][1],squares)}
+          {this.renderSquare(3,2,miscSquares[3][2],squares)}
+          {this.renderSquare(3,3,miscSquares[3][3],squares)}
+          {this.renderSquare(3,4,miscSquares[3][4],squares)}
+          {this.renderSquare(3,5,miscSquares[3][5],squares)}
+          {this.renderSquare(3,6,miscSquares[3][6],squares)}
+          {this.renderSquare(3,7,miscSquares[3][7],squares)}
         </div>
         <div className="board-row">
-          {this.renderSquare(4,0,miscSquares[4][0])}
-          {this.renderSquare(4,1,miscSquares[4][1])}
-          {this.renderSquare(4,2,miscSquares[4][2])}
-          {this.renderSquare(4,3,miscSquares[4][3])}
-          {this.renderSquare(4,4,miscSquares[4][4])}
-          {this.renderSquare(4,5,miscSquares[4][5])}
-          {this.renderSquare(4,6,miscSquares[4][6])}
-          {this.renderSquare(4,7,miscSquares[4][7])}
+          {this.renderSquare(4,0,miscSquares[4][0],squares)}
+          {this.renderSquare(4,1,miscSquares[4][1],squares)}
+          {this.renderSquare(4,2,miscSquares[4][2],squares)}
+          {this.renderSquare(4,3,miscSquares[4][3],squares)}
+          {this.renderSquare(4,4,miscSquares[4][4],squares)}
+          {this.renderSquare(4,5,miscSquares[4][5],squares)}
+          {this.renderSquare(4,6,miscSquares[4][6],squares)}
+          {this.renderSquare(4,7,miscSquares[4][7],squares)}
         </div>
         <div className="board-row">
-          {this.renderSquare(5,0,miscSquares[5][0])}
-          {this.renderSquare(5,1,miscSquares[5][1])}
-          {this.renderSquare(5,2,miscSquares[5][2])}
-          {this.renderSquare(5,3,miscSquares[5][3])}
-          {this.renderSquare(5,4,miscSquares[5][4])}
-          {this.renderSquare(5,5,miscSquares[5][5])}
-          {this.renderSquare(5,6,miscSquares[5][6])}
-          {this.renderSquare(5,7,miscSquares[5][7])}
+          {this.renderSquare(5,0,miscSquares[5][0],squares)}
+          {this.renderSquare(5,1,miscSquares[5][1],squares)}
+          {this.renderSquare(5,2,miscSquares[5][2],squares)}
+          {this.renderSquare(5,3,miscSquares[5][3],squares)}
+          {this.renderSquare(5,4,miscSquares[5][4],squares)}
+          {this.renderSquare(5,5,miscSquares[5][5],squares)}
+          {this.renderSquare(5,6,miscSquares[5][6],squares)}
+          {this.renderSquare(5,7,miscSquares[5][7],squares)}
         </div>
         <div className="board-row">
-          {this.renderSquare(6,0,miscSquares[6][0])}
-          {this.renderSquare(6,1,miscSquares[6][1])}
-          {this.renderSquare(6,2,miscSquares[6][2])}
-          {this.renderSquare(6,3,miscSquares[6][3])}
-          {this.renderSquare(6,4,miscSquares[6][4])}
-          {this.renderSquare(6,5,miscSquares[6][5])}
-          {this.renderSquare(6,6,miscSquares[6][6])}
-          {this.renderSquare(6,7,miscSquares[6][7])}
+          {this.renderSquare(6,0,miscSquares[6][0],squares)}
+          {this.renderSquare(6,1,miscSquares[6][1],squares)}
+          {this.renderSquare(6,2,miscSquares[6][2],squares)}
+          {this.renderSquare(6,3,miscSquares[6][3],squares)}
+          {this.renderSquare(6,4,miscSquares[6][4],squares)}
+          {this.renderSquare(6,5,miscSquares[6][5],squares)}
+          {this.renderSquare(6,6,miscSquares[6][6],squares)}
+          {this.renderSquare(6,7,miscSquares[6][7],squares)}
         </div>
         <div className="board-row">
-          {this.renderSquare(7,0,miscSquares[7][0])}
-          {this.renderSquare(7,1,miscSquares[7][1])}
-          {this.renderSquare(7,2,miscSquares[7][2])}
-          {this.renderSquare(7,3,miscSquares[7][3])}
-          {this.renderSquare(7,4,miscSquares[7][4])}
-          {this.renderSquare(7,5,miscSquares[7][5])}
-          {this.renderSquare(7,6,miscSquares[7][6])}
-          {this.renderSquare(7,7,miscSquares[7][7])}
+          {this.renderSquare(7,0,miscSquares[7][0],squares)}
+          {this.renderSquare(7,1,miscSquares[7][1],squares)}
+          {this.renderSquare(7,2,miscSquares[7][2],squares)}
+          {this.renderSquare(7,3,miscSquares[7][3],squares)}
+          {this.renderSquare(7,4,miscSquares[7][4],squares)}
+          {this.renderSquare(7,5,miscSquares[7][5],squares)}
+          {this.renderSquare(7,6,miscSquares[7][6],squares)}
+          {this.renderSquare(7,7,miscSquares[7][7],squares)}
         </div>
       </div>
     );
@@ -214,11 +220,12 @@ class Game extends React.Component {
 
     if (newMiscSquares[i][j]=="threatened" || newMiscSquares[i][j]=="possible"){
       newSquares = movePiece(i,j,pieceClickedRow,pieceClickedCol,newSquares)
-      history.push(newSquares);
+      history.push({squares: newSquares});
       this.setState({
         history: history,
         whitesTurn: newTurn,
-        stepNumber: newStep
+        stepNumber: newStep,
+        miscSquares: Array(8).fill(null).map(()=>Array(8).fill(null))
       }) 
       return; 
     }
@@ -322,13 +329,12 @@ class Game extends React.Component {
 
   render() {
     const history = JSON.parse(JSON.stringify(this.state.history));
-    const current = JSON.parse(JSON.stringify(history[this.state.stepNumber]));
-    const winner = calculateWinner(current.squares);
+    const current = history[this.state.stepNumber];
+    const newMiscSquares = JSON.parse(JSON.stringify(this.state.miscSquares));
+    const newSquares = current.squares;
 
     const moves = history.map((step, move) => {
-      const desc = move ?
-        'Go to move #' + move :
-        'Go to game start';
+      const desc = "Jump to Move"
       return (
         <li key={move}>
           <button onClick={() => this.jumpTo(move)}>{desc}</button>
@@ -337,19 +343,15 @@ class Game extends React.Component {
     });
 
     let status;
-    if (winner) {
-      status = "Winner: " + winner;
-    } else {
-      status = "Next player: " + (this.state.whitesTurn ? "White" : "Black");
-    }
+    status = "Next player: " + (this.state.whitesTurn ? "White" : "Black");
 
     return (
-      <div className="game">
+      <div>
         <div className="game-board">
           <Board
-            squares={current.squares}
+            squares={newSquares}
             onClick={(i,j) => this.handleClick(i,j)}
-            miscSquares={this.state.miscSquares}
+            miscSquares={newMiscSquares}
           />
         </div>
         <div className="game-info">
@@ -363,8 +365,6 @@ class Game extends React.Component {
 
 // ========================================
 
-const container = document.getElementById("root"); 
-const root = createRoot(container);
 root.render(<Game />); 
 
 function calculateWinner(squares) {
@@ -407,6 +407,7 @@ function displayKnightMoves(currentPieceRow, currentPieceCol, miscSquares, white
       }
     }
   }
+  miscSquares[currentPieceRow][currentPieceCol]="selected";
   return miscSquares;
 }
 
@@ -425,6 +426,7 @@ function displayBishopMoves(currentPieceRow, currentPieceCol, miscSquares, white
   miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,+1,squares,miscSquares,whitesTurn)
   // down and right "line of sight"
   miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,+1,squares,miscSquares,whitesTurn)
+  miscSquares[currentPieceRow][currentPieceCol]="selected";
   return miscSquares; 
 }
 
@@ -509,6 +511,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, miscSquares, whitesT
       }
     }
   }
+  miscSquares[currentPieceRow][currentPieceCol]="selected";
   return miscSquares; 
 }
 
@@ -527,6 +530,7 @@ function displayRookMoves(currentPieceRow, currentPieceCol, miscSquares, whitesT
   miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,0,squares,miscSquares,whitesTurn)
   // right "line of sight"
   miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,0,squares,miscSquares,whitesTurn)
+  miscSquares[currentPieceRow][currentPieceCol]="selected";
   return miscSquares; 
 }
 
@@ -553,6 +557,7 @@ function displayQueenMoves(currentPieceRow, currentPieceCol, miscSquares, whites
   miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,+1,squares,miscSquares,whitesTurn)
   // down and right "line of sight"
   miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,+1,squares,miscSquares,whitesTurn)
+  miscSquares[currentPieceRow][currentPieceCol]="selected";
   return miscSquares; 
 }
 
@@ -590,6 +595,7 @@ function displayKingMoves(currentPieceRow, currentPieceCol, miscSquares, whitesT
     }
   }
   // remove options that would put the king in check (probably make a helper function)
+  miscSquares[currentPieceRow][currentPieceCol]="selected";
   return miscSquares;
 }
 
@@ -628,3 +634,8 @@ function movePiece(endRow, endCol, startRow, startCol, squares){
   // logTakenPiece(endpiece) 
   return squares; 
 }
+
+// Function to add a piece to the list of taken pieces
+// function logTakenPiece(endpiece){
+
+// }

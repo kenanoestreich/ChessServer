@@ -115,7 +115,7 @@ ol, ul {
 }
 
 .selectedsquare {
-  background: rgb(241, 248, 32);
+  background: hsl(62, 100%, 50%);
   border: 1px solid rgb(0, 0, 0);
   float: left;
   font-size: 40px;
@@ -136,11 +136,15 @@ ol, ul {
   background: #ddd;
 }
 
-.game {
+/* .game {
   display: flex;
   flex-direction: row;
-}
+} */
 
 .game-info {
   margin-left: 20px;
+}
+
+.horizontal {
+  display: inline;
 }
