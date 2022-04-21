@@ -332,21 +332,37 @@ class Game extends React.Component {
     const current = history[this.state.stepNumber];
     const newMiscSquares = JSON.parse(JSON.stringify(this.state.miscSquares));
     const newSquares = current.squares;
+    const whitesTurn = this.state.whitesTurn;
 
     const moves = history.map((step, move) => {
-      const desc = "Jump to Move"
-      return (
-        <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
-        </li>
-      );
+      if (move!=0){
+        if (move%2===1) { //white's move most recent
+          const desc = "White's Move"
+          return (
+            <li id={move}>
+              <button onClick={() => this.jumpTo(move)}>{desc}</button>
+            </li>
+          );
+        }
+        else if (move%2===0) {
+          const desc = "Black's Move"
+          const root = createRoot(document.getElementById(move-1));
+          root.render(<span><button onClick={() => this.jumpTo(move-1)}>White's Move</button>
+          <button onClick={() => this.jumpTo(move)}>{desc}</button></span>)
+        }
+      }
+      else{
+        return (
+          <div></div>
+        );
+      }
     });
 
     let status;
     status = "Next player: " + (this.state.whitesTurn ? "White" : "Black");
 
     return (
-      <div>
+      <div className="game">
         <div className="game-board">
           <Board
             squares={newSquares}
