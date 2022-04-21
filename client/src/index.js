@@ -92,10 +92,6 @@ class Board extends React.Component {
       );
     }
   }
-  
-  componentDidMount() {
-
-  }
 
   render() {
     const miscSquares = JSON.parse(JSON.stringify(this.props.miscSquares)); 
@@ -210,7 +206,7 @@ class Game extends React.Component {
 
   handleClick(i,j) {
     let history = JSON.parse(JSON.stringify(this.state.history));
-    const current = history[history.length - 1];
+    const current = history[this.state.stepNumber];
     let newSquares = JSON.parse(JSON.stringify(current.squares));
     let newMiscSquares = JSON.parse(JSON.stringify(this.state.miscSquares));
     let newStep = this.state.stepNumber; 
@@ -218,7 +214,7 @@ class Game extends React.Component {
     let newTurn = this.state.whitesTurn; 
     newTurn = !newTurn; 
 
-    if (newMiscSquares[i][j]=="threatened" || newMiscSquares[i][j]=="possible"){
+    if (newMiscSquares[i][j]==="threatened" || newMiscSquares[i][j]==="possible"){
       newSquares = movePiece(i,j,pieceClickedRow,pieceClickedCol,newSquares)
       history.push({squares: newSquares});
       this.setState({
@@ -238,7 +234,7 @@ class Game extends React.Component {
 
     // show bishop moves
 
-    if (current.squares[i][j]==blackBishop || current.squares[i][j]==whiteBishop) {
+    if (current.squares[i][j]===blackBishop || current.squares[i][j]===whiteBishop) {
       this.setState({
         miscSquares: displayBishopMoves(i,j,this.state.miscSquares,this.state.whitesTurn,current.squares),
       });
@@ -248,7 +244,7 @@ class Game extends React.Component {
 
     // show knight moves
 
-    if (current.squares[i][j]==blackKnight || current.squares[i][j]==whiteKnight) {
+    if (current.squares[i][j]===blackKnight || current.squares[i][j]===whiteKnight) {
       this.setState({
         miscSquares: displayKnightMoves(i,j,this.state.miscSquares,this.state.whitesTurn, current.squares),
       });
@@ -258,9 +254,9 @@ class Game extends React.Component {
 
     // show pawn moves
 
-    if (current.squares[i][j]==blackPawn || current.squares[i][j]==whitePawn) {
+    if (current.squares[i][j]===blackPawn || current.squares[i][j]===whitePawn) {
       this.setState({
-        miscSquares: displayPawnMoves(i,j,this.state.miscSquares,this.state.whitesTurn, current.squares),
+        miscSquares: displayPawnMoves(i,j,this.state.whitesTurn, current.squares),
       }); 
       pieceClickedRow = i; 
       pieceClickedCol = j; 
@@ -268,7 +264,7 @@ class Game extends React.Component {
 
     // show rook moves
 
-    if (current.squares[i][j]==blackRook || current.squares[i][j]==whiteRook) {
+    if (current.squares[i][j]===blackRook || current.squares[i][j]===whiteRook) {
       this.setState({
         miscSquares: displayRookMoves(i,j,this.state.miscSquares,this.state.whitesTurn, current.squares),
       });
@@ -278,7 +274,7 @@ class Game extends React.Component {
 
     // show queen moves
 
-    if (current.squares[i][j]==blackQueen || current.squares[i][j]==whiteQueen) {
+    if (current.squares[i][j]===blackQueen || current.squares[i][j]===whiteQueen) {
       this.setState({
         miscSquares: displayQueenMoves(i,j,this.state.miscSquares,this.state.whitesTurn, current.squares),
       });
@@ -288,7 +284,7 @@ class Game extends React.Component {
 
     // show king moves
 
-    if (current.squares[i][j]==blackKing || current.squares[i][j]==whiteKing) {
+    if (current.squares[i][j]===blackKing || current.squares[i][j]===whiteKing) {
       this.setState({
         miscSquares: displayKingMoves(i,j,this.state.miscSquares,this.state.whitesTurn, current.squares),
       });
@@ -298,7 +294,7 @@ class Game extends React.Component {
 
     // reset possible moves highlights
 
-    if (current.squares[i][j]==null){
+    if (current.squares[i][j]===null){
       this.setState({
         miscSquares: Array(8).fill(null).map(()=>Array(8).fill(null)),
       }); 
@@ -332,14 +328,13 @@ class Game extends React.Component {
     const current = history[this.state.stepNumber];
     const newMiscSquares = JSON.parse(JSON.stringify(this.state.miscSquares));
     const newSquares = current.squares;
-    const whitesTurn = this.state.whitesTurn;
 
     const moves = history.map((step, move) => {
-      if (move!=0){
+      if (move!==0){
         if (move%2===1) { //white's move most recent
           const desc = "White's Move"
           return (
-            <li id={move}>
+            <li id={move} key={move}>
               <button onClick={() => this.jumpTo(move)}>{desc}</button>
             </li>
           );
@@ -395,8 +390,8 @@ function calculateWinner(squares) {
 // Knights
 function displayKnightMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
   miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]==blackKnight) 
-      || !whitesTurn && squares[currentPieceRow][currentPieceCol]==whiteKnight){
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackKnight) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteKnight)){
     return miscSquares; 
   }
   let possibleSquares = [];
@@ -430,8 +425,8 @@ function displayKnightMoves(currentPieceRow, currentPieceCol, miscSquares, white
 // Bishops 
 function displayBishopMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
   miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]==blackBishop) 
-      || !whitesTurn && squares[currentPieceRow][currentPieceCol]==whiteBishop){
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackBishop) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteBishop)){
     return miscSquares; 
   }
   // up and left "line of sight"
@@ -447,18 +442,18 @@ function displayBishopMoves(currentPieceRow, currentPieceCol, miscSquares, white
 }
 
 // Pawns
-function displayPawnMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
-  miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]==blackPawn) 
-      || !whitesTurn && squares[currentPieceRow][currentPieceCol]==whitePawn){
+function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, squares) {
+  let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackPawn) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whitePawn)){
     return miscSquares; 
   }
 
   // white pawn hasn't moved yet
-  if (whitesTurn && currentPieceRow==6) {
-    if (squares[currentPieceRow-1][currentPieceCol]==null){
+  if (whitesTurn && currentPieceRow===6) {
+    if (squares[currentPieceRow-1][currentPieceCol]===null){
       miscSquares[currentPieceRow-1][currentPieceCol]="possible"; 
-      if (squares[currentPieceRow-2][currentPieceCol]==null){
+      if (squares[currentPieceRow-2][currentPieceCol]===null){
         miscSquares[currentPieceRow-2][currentPieceCol]="possible"; 
       }
     }
@@ -475,10 +470,10 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, miscSquares, whitesT
   }
 
   // black pawn hasn't moved yet
-  if (!whitesTurn && currentPieceRow==1) {
-    if (squares[currentPieceRow+1][currentPieceCol]==null){
+  if (!whitesTurn && currentPieceRow===1) {
+    if (squares[currentPieceRow+1][currentPieceCol]===null){
       miscSquares[currentPieceRow+1][currentPieceCol]="possible"; 
-      if (squares[currentPieceRow+2][currentPieceCol]==null){
+      if (squares[currentPieceRow+2][currentPieceCol]===null){
         miscSquares[currentPieceRow+2][currentPieceCol]="possible"; 
       }
     }
@@ -495,8 +490,8 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, miscSquares, whitesT
   }
 
   // white pawn has moved
-  if (whitesTurn && currentPieceRow!=6) {
-    if (squares[currentPieceRow-1][currentPieceCol]==null){
+  if (whitesTurn && currentPieceRow!==6) {
+    if (squares[currentPieceRow-1][currentPieceCol]===null){
       miscSquares[currentPieceRow-1][currentPieceCol]="possible"; 
     }
     if ((currentPieceCol-1)>=0){
@@ -512,8 +507,8 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, miscSquares, whitesT
   }
 
   // black pawn has moved
-  if (!whitesTurn && currentPieceRow!=1) {
-    if (squares[currentPieceRow+1][currentPieceCol]==null){
+  if (!whitesTurn && currentPieceRow!==1) {
+    if (squares[currentPieceRow+1][currentPieceCol]===null){
       miscSquares[currentPieceRow+1][currentPieceCol]="possible"; 
     }
     if ((currentPieceCol-1)>=0){
@@ -534,8 +529,8 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, miscSquares, whitesT
 // Rooks 
 function displayRookMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
   miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]==blackRook) 
-      || !whitesTurn && squares[currentPieceRow][currentPieceCol]==whiteRook){
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackRook) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteRook)){
     return miscSquares; 
   }
   // up "line of sight"
@@ -553,8 +548,8 @@ function displayRookMoves(currentPieceRow, currentPieceCol, miscSquares, whitesT
 // Queens
 function displayQueenMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
   miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]==blackQueen) 
-      || !whitesTurn && squares[currentPieceRow][currentPieceCol]==whiteQueen){
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackQueen) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteQueen)){
     return miscSquares; 
   }
   // up "line of sight"
@@ -581,8 +576,8 @@ function displayQueenMoves(currentPieceRow, currentPieceCol, miscSquares, whites
 // TO DO: NEED TO NOT DISPLAY MOVES THAT WOULD PUT THE KING IN CHECK AND CASTLING
 function displayKingMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
   miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]==blackKing) 
-      || !whitesTurn && squares[currentPieceRow][currentPieceCol]==whiteKing){
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackKing) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteKing)){
     return miscSquares; 
   }
   let possibleSquares = [];
@@ -620,7 +615,7 @@ function checkAxis(currentPieceRow, currentPieceCol, rowDelta, colDelta, squares
   let i=currentPieceRow+rowDelta;
   let j=currentPieceCol+colDelta; 
   while (i < 8 && i >=0 && j < 8 && j >=0) {
-    if (squares[i][j]==null){
+    if (squares[i][j]===null){
       miscSquares[i][j]="possible"; 
     }
     else if ((whitesTurn && whitePieces.includes(squares[i][j]))
@@ -642,7 +637,7 @@ function checkAxis(currentPieceRow, currentPieceCol, rowDelta, colDelta, squares
 function movePiece(endRow, endCol, startRow, startCol, squares){
   let startpiece = squares[startRow][startCol];
   let endpiece=null;
-  if (squares[endRow][endCol]!=null){
+  if (squares[endRow][endCol]!==null){
     endpiece = squares[endRow][endCol];
   }
   squares[startRow][startCol]=null; 
@@ -651,6 +646,59 @@ function movePiece(endRow, endCol, startRow, startCol, squares){
   return squares; 
 }
 
+// Function for compiling all squares the opponent threatens
+function checkThreatenedSquares(opponentColor, squares){
+  let miscSquares; 
+  if (opponentColor==="Black"){
+    for (let i=0; i<8; i++){
+      for (let j=0; j<8; j++){
+        if (squares[i][j]===blackPawn){
+          miscSquares=displayPawnMoves(i,j,false,squares);
+        }
+        else if (squares[i][j]===blackRook){
+          
+        }
+        else if (squares[i][j]===blackKnight){
+
+        }
+        else if (squares[i][j]===blackBishop){
+
+        }
+        else if (squares[i][j]===blackQueen){
+
+        }
+        else if (squares[i][j]===blackKing){
+
+        }
+
+      }
+    }
+  }
+  else if (opponentColor==="White"){
+    for (let i=0; i<8; i++){
+      for (let j=0; j<8; j++){
+        if (squares[i][j]===whitePawn){
+
+        }
+        else if (squares[i][j]===whiteRook){
+
+        }
+        else if (squares[i][j]===whiteKnight){
+
+        }
+        else if (squares[i][j]===whiteBishop){
+
+        }
+        else if (squares[i][j]===whiteQueen){
+
+        }
+        else if (squares[i][j]===whiteKing){
+
+        }
+      }
+    }
+  }
+}
 // Function to add a piece to the list of taken pieces
 // function logTakenPiece(endpiece){
 
