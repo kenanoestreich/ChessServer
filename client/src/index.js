@@ -526,6 +526,81 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, squares)
   return miscSquares; 
 }
 
+// Helper function 
+function displayPawnThreats(currentPieceRow, currentPieceCol, whitesTurn, squares) {
+  let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackPawn) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whitePawn)){
+    return miscSquares; 
+  }
+
+  // white pawn hasn't moved yet
+  if (whitesTurn && currentPieceRow===6) {
+    if ((currentPieceCol-1)>=0){
+      miscSquares[currentPieceRow-1][currentPieceCol-1]="threatened"; 
+    }
+    if ((currentPieceCol+1)<8){
+      miscSquares[currentPieceRow-1][currentPieceCol+1]="threatened"; 
+    }
+  }
+
+  // black pawn hasn't moved yet
+  if (!whitesTurn && currentPieceRow===1) {
+    if (squares[currentPieceRow+1][currentPieceCol]===null){
+      miscSquares[currentPieceRow+1][currentPieceCol]="possible"; 
+      if (squares[currentPieceRow+2][currentPieceCol]===null){
+        miscSquares[currentPieceRow+2][currentPieceCol]="possible"; 
+      }
+    }
+    if ((currentPieceCol-1)>=0){
+      if (whitePieces.includes(squares[currentPieceRow+1][currentPieceCol-1])){
+        miscSquares[currentPieceRow+1][currentPieceCol-1]="threatened"; 
+      }
+    }
+    if ((currentPieceCol+1)<8){
+      if (whitePieces.includes(squares[currentPieceRow+1][currentPieceCol+1])){
+        miscSquares[currentPieceRow+1][currentPieceCol+1]="threatened"; 
+      }
+    }
+  }
+
+  // white pawn has moved
+  if (whitesTurn && currentPieceRow!==6) {
+    if (squares[currentPieceRow-1][currentPieceCol]===null){
+      miscSquares[currentPieceRow-1][currentPieceCol]="possible"; 
+    }
+    if ((currentPieceCol-1)>=0){
+      if (blackPieces.includes(squares[currentPieceRow-1][currentPieceCol-1])){
+        miscSquares[currentPieceRow-1][currentPieceCol-1]="threatened"; 
+      }
+    }
+    if ((currentPieceCol+1)<8){
+      if (blackPieces.includes(squares[currentPieceRow-1][currentPieceCol+1])){
+        miscSquares[currentPieceRow-1][currentPieceCol+1]="threatened"; 
+      }
+    }
+  }
+
+  // black pawn has moved
+  if (!whitesTurn && currentPieceRow!==1) {
+    if (squares[currentPieceRow+1][currentPieceCol]===null){
+      miscSquares[currentPieceRow+1][currentPieceCol]="possible"; 
+    }
+    if ((currentPieceCol-1)>=0){
+      if (whitePieces.includes(squares[currentPieceRow+1][currentPieceCol-1])){
+        miscSquares[currentPieceRow+1][currentPieceCol-1]="threatened"; 
+      }
+    }
+    if ((currentPieceCol+1)<8){
+      if (whitePieces.includes(squares[currentPieceRow+1][currentPieceCol+1])){
+        miscSquares[currentPieceRow+1][currentPieceCol+1]="threatened"; 
+      }
+    }
+  }
+  miscSquares[currentPieceRow][currentPieceCol]="selected";
+  return miscSquares; 
+}
+
 // Rooks 
 function displayRookMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
   miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
@@ -653,7 +728,7 @@ function checkThreatenedSquares(opponentColor, squares){
     for (let i=0; i<8; i++){
       for (let j=0; j<8; j++){
         if (squares[i][j]===blackPawn){
-          miscSquares=displayPawnMoves(i,j,false,squares);
+          miscSquares=displayPawnThreats(i,j,false,squares);
         }
         else if (squares[i][j]===blackRook){
           
