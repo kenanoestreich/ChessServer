@@ -812,6 +812,47 @@ function squaresCombiner(pieceThreats, allThreatenedSquares){
   }
   return allThreatenedSquares; 
 }
+
+// Function to detect if King is CURRENTLY in check. 
+// Will be called recursively after prospective moves to see if the move gets the king out of check. 
+function isKingCurrentlyInCheck(whitesTurn, squares){
+  let allThreatenedSquares; 
+  let miscSquares = this.state.miscSquares; 
+  if (whitesTurn) {
+    for (let i=0; i<8; i++){
+      for (let j=0; j<8; j++){
+        if (squares[i][j]===whiteKing){
+          allThreatenedSquares = checkThreatenedSquares("Black",squares); 
+          if (allThreatenedSquares[i][j]==="threatened"){
+            miscSquares[i][j]="threatened"
+            this.setState({
+              miscSquares: miscSquares
+            })
+            return true; 
+          }
+        }
+      }
+    }
+  }
+  else{
+    for (let i=0; i<8; i++){
+      for (let j=0; j<8; j++){
+        if (squares[i][j]===blackKing){
+          allThreatenedSquares = checkThreatenedSquares("White",squares); 
+          if (allThreatenedSquares[i][j]==="threatened"){
+            miscSquares[i][j]="threatened"
+            this.setState({
+              miscSquares: miscSquares
+            })
+            return true; 
+          }
+        }
+      }
+    }
+  }
+  return false; 
+}
+
 // Function to add a piece to the list of taken pieces
 // function logTakenPiece(endpiece){
 
