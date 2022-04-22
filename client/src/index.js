@@ -622,6 +622,7 @@ function displayQueenMoves(currentPieceRow, currentPieceCol, whitesTurn, squares
 // TO DO: NEED TO NOT DISPLAY MOVES THAT WOULD PUT THE KING IN CHECK AND CASTLING
 function displayKingMoves(currentPieceRow, currentPieceCol, whitesTurn, squares) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+  let newSquares; 
   if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackKing) 
       || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteKing)){
     return miscSquares; 
@@ -631,7 +632,6 @@ function displayKingMoves(currentPieceRow, currentPieceCol, whitesTurn, squares)
   possibleSquares.push([currentPieceRow-1, currentPieceCol]);
   possibleSquares.push([currentPieceRow-1, currentPieceCol+1]);
   possibleSquares.push([currentPieceRow, currentPieceCol-1]);
-  possibleSquares.push([currentPieceRow, currentPieceCol]);
   possibleSquares.push([currentPieceRow, currentPieceCol+1]);
   possibleSquares.push([currentPieceRow+1, currentPieceCol-1]);
   possibleSquares.push([currentPieceRow+1, currentPieceCol]); 
@@ -642,31 +642,51 @@ function displayKingMoves(currentPieceRow, currentPieceCol, whitesTurn, squares)
       if ((whitesTurn && blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
           || (!whitesTurn && whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="threatened";
+        let squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(possibleSquares[i][0],possibleSquares[i][1],currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+          miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]=null; 
+        }
       }
       else if ((!whitesTurn && blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
           || (whitesTurn && whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
       }
       else {
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="possible";
+        let squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(possibleSquares[i][0],possibleSquares[i][1],currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+          miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]=null; 
+        }
       }
-    }
-  }
-  // remove any moves that would put the king in check (probably make a helper function)
-  let squaresInCheck; 
-  if (whitesTurn){
-    squaresInCheck = checkThreatenedSquares("Black", squares);
-  }
-  else {
-    squaresInCheck = checkThreatenedSquares("White", squares); 
+    } 
   }
 
-  for (let i=0; i<8; i++){
-    for (let j=0; j<8; j++){
-      if (squaresInCheck[i][j]==="threatened"){
-        miscSquares[i][j]=null; 
-      }
-    }
-  }
+  // This is obsolete now
+
+  // // remove any moves that end with the king in check (probably make a helper function)
+  // let squaresInCheck; 
+  // if (whitesTurn){
+  //   for (let i=0; i<8; i++){
+  //     for (let j=0; j<8; j++){
+  //       if (squaresInCheck[i][j]==="threatened"){
+  //         miscSquares[i][j]=null; 
+  //       }
+  //     }
+  //   }
+  //   squaresInCheck = checkThreatenedSquares("Black", squares);
+  // }
+  // else {
+  //   squaresInCheck = checkThreatenedSquares("White", squares); 
+  // }
+
+  // for (let i=0; i<8; i++){
+  //   for (let j=0; j<8; j++){
+  //     if (squaresInCheck[i][j]==="threatened"){
+  //       miscSquares[i][j]=null; 
+  //     }
+  //   }
+  // }
 
   // Highlight selected piece
   miscSquares[currentPieceRow][currentPieceCol]="selected";
@@ -833,14 +853,12 @@ function squaresCombiner(pieceThreats, allThreatenedSquares){
 // Will be called recursively after prospective moves to see if the move gets the king out of check. 
 function isKingCurrentlyInCheck(whitesTurn, squares){
   let allThreatenedSquares; 
-  let miscSquares = this.state.miscSquares; 
   if (whitesTurn) {
     for (let i=0; i<8; i++){
       for (let j=0; j<8; j++){
         if (squares[i][j]===whiteKing){
           allThreatenedSquares = checkThreatenedSquares("Black",squares); 
           if (allThreatenedSquares[i][j]==="threatened"){
-            miscSquares[i][j]="threatened"
             return true; 
           }
         }
@@ -853,7 +871,6 @@ function isKingCurrentlyInCheck(whitesTurn, squares){
         if (squares[i][j]===blackKing){
           allThreatenedSquares = checkThreatenedSquares("White",squares); 
           if (allThreatenedSquares[i][j]==="threatened"){
-            miscSquares[i][j]="threatened"
             return true; 
           }
         }
