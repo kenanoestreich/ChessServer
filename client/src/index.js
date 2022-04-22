@@ -91,6 +91,15 @@ class Board extends React.Component {
         />
       );
     }
+    else if (misc==="incheck"){
+      return (
+        <Square
+          value={this.props.squares[i][j]}
+          onClick={() => this.props.onClick(i,j)}
+          squareColor="inchecksquare"
+        />
+      );
+    }
   }
 
   render() {
@@ -221,13 +230,33 @@ class Game extends React.Component {
 
     if (newMiscSquares[i][j]==="threatened" || newMiscSquares[i][j]==="possible"){
       newSquares = movePiece(i,j,pieceClickedRow,pieceClickedCol,newSquares)
-      history.push({squares: newSquares});
-      this.setState({
-        history: history,
-        whitesTurn: newTurn,
-        stepNumber: newStep,
-        miscSquares: Array(8).fill(null).map(()=>Array(8).fill(null))
+      if (isKingCurrentlyInCheck(this.state.whitesTurn,newSquares)){ // if the opponent's king is in check
+        history.push({squares: newSquares});
+        let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null))
+        for (let i=0; i<8; i++){
+          for (let j=0; j<8; j++){
+            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
+                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
+              miscSquares[i][j]="incheck"
+            }
+          }
+        }
+        this.setState({
+          history: history,
+          whitesTurn: newTurn,
+          stepNumber: newStep,
+          miscSquares: miscSquares
       }) 
+      }
+      else {
+        history.push({squares: newSquares});
+        this.setState({
+          history: history,
+          whitesTurn: newTurn,
+          stepNumber: newStep,
+          miscSquares: Array(8).fill(null).map(()=>Array(8).fill(null))
+        }) 
+      }
       return; 
     }
   
@@ -240,71 +269,191 @@ class Game extends React.Component {
     // show bishop moves
 
     if (current.squares[i][j]===blackBishop || current.squares[i][j]===whiteBishop) {
-      this.setState({
-        miscSquares: displayBishopMoves(i,j,this.state.whitesTurn,current.squares),
-      });
+      if (isKingCurrentlyInCheck(this.state.whitesTurn,current.squares)){
+        let miscSquares = displayBishopMoves(i,j,this.state.whitesTurn,current.squares); 
+        for (let i=0; i<8; i++){
+          for (let j=0; j<8; j++){
+            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
+                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
+              miscSquares[i][j]="incheck"
+            }
+          }
+        }
+        this.setState({
+          miscSquares: miscSquares
+        });
+      }
+      else {
+        this.setState({
+          miscSquares: displayBishopMoves(i,j,this.state.whitesTurn,current.squares),
+        });
+      }
+      
       pieceClickedRow = i; 
       pieceClickedCol = j; 
+      return; 
     }
 
     // show knight moves
 
     if (current.squares[i][j]===blackKnight || current.squares[i][j]===whiteKnight) {
-      this.setState({
-        miscSquares: displayKnightMoves(i,j,this.state.whitesTurn, current.squares),
-      });
+      if (isKingCurrentlyInCheck(this.state.whitesTurn,current.squares)){
+        let miscSquares = displayKnightMoves(i,j,this.state.whitesTurn,current.squares); 
+        for (let i=0; i<8; i++){
+          for (let j=0; j<8; j++){
+            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
+                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
+              miscSquares[i][j]="incheck"
+            }
+          }
+        }
+        this.setState({
+          miscSquares: miscSquares
+        });
+      }
+      else {
+        this.setState({
+          miscSquares: displayKnightMoves(i,j,this.state.whitesTurn, current.squares),
+        });
+      }
       pieceClickedRow = i; 
       pieceClickedCol = j; 
+      return; 
     }
 
     // show pawn moves
 
     if (current.squares[i][j]===blackPawn || current.squares[i][j]===whitePawn) {
-      this.setState({
-        miscSquares: displayPawnMoves(i,j,this.state.whitesTurn, current.squares),
-      }); 
+      if (isKingCurrentlyInCheck(this.state.whitesTurn,current.squares)){
+        let miscSquares = displayPawnMoves(i,j,this.state.whitesTurn,current.squares); 
+        for (let i=0; i<8; i++){
+          for (let j=0; j<8; j++){
+            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
+                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
+              miscSquares[i][j]="incheck"
+            }
+          }
+        }
+        this.setState({
+          miscSquares: miscSquares
+        });
+      }
+      else {
+        this.setState({
+          miscSquares: displayPawnMoves(i,j,this.state.whitesTurn, current.squares),
+        }); 
+      } 
       pieceClickedRow = i; 
       pieceClickedCol = j; 
+      return; 
     }
 
     // show rook moves
 
     if (current.squares[i][j]===blackRook || current.squares[i][j]===whiteRook) {
-      this.setState({
-        miscSquares: displayRookMoves(i,j,this.state.whitesTurn, current.squares),
-      });
+      if (isKingCurrentlyInCheck(this.state.whitesTurn,current.squares)){
+        let miscSquares = displayRookMoves(i,j,this.state.whitesTurn,current.squares); 
+        for (let i=0; i<8; i++){
+          for (let j=0; j<8; j++){
+            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
+                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
+              miscSquares[i][j]="incheck"
+            }
+          }
+        }
+        this.setState({
+          miscSquares: miscSquares
+        });
+      }
+      else {
+        this.setState({
+          miscSquares: displayRookMoves(i,j,this.state.whitesTurn, current.squares),
+        });
+      }
       pieceClickedRow = i; 
       pieceClickedCol = j; 
+      return;
     }
 
     // show queen moves
 
     if (current.squares[i][j]===blackQueen || current.squares[i][j]===whiteQueen) {
-      this.setState({
-        miscSquares: displayQueenMoves(i,j,this.state.whitesTurn, current.squares),
-      });
+      if (isKingCurrentlyInCheck(this.state.whitesTurn,current.squares)){
+        let miscSquares = displayQueenMoves(i,j,this.state.whitesTurn,current.squares); 
+        for (let i=0; i<8; i++){
+          for (let j=0; j<8; j++){
+            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
+                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
+              miscSquares[i][j]="incheck"
+            }
+          }
+        }
+        this.setState({
+          miscSquares: miscSquares
+        });
+      }
+      else {
+        this.setState({
+          miscSquares: displayQueenMoves(i,j,this.state.whitesTurn, current.squares),
+        });
+      }
       pieceClickedRow = i; 
       pieceClickedCol = j; 
+      return;
     }
 
     // show king moves
 
     if (current.squares[i][j]===blackKing || current.squares[i][j]===whiteKing) {
-      this.setState({
-        miscSquares: displayKingMoves(i,j,this.state.whitesTurn, current.squares),
-      });
+      if (isKingCurrentlyInCheck(this.state.whitesTurn,current.squares)){
+        let miscSquares = displayKingMoves(i,j,this.state.whitesTurn,current.squares); 
+        for (let i=0; i<8; i++){
+          for (let j=0; j<8; j++){
+            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
+                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
+              miscSquares[i][j]="incheck"
+            }
+          }
+        }
+        this.setState({
+          miscSquares: miscSquares
+        });
+      }
+      else {
+        this.setState({
+          miscSquares: displayKingMoves(i,j,this.state.whitesTurn, current.squares),
+        });
+      }
       pieceClickedRow = i; 
       pieceClickedCol = j; 
+      return; 
     }
 
     // reset possible moves highlights
 
     if (current.squares[i][j]===null){
-      this.setState({
-        miscSquares: Array(8).fill(null).map(()=>Array(8).fill(null)),
-      }); 
+      if (isKingCurrentlyInCheck(this.state.whitesTurn,current.squares)){
+        let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
+        for (let i=0; i<8; i++){
+          for (let j=0; j<8; j++){
+            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
+                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
+              miscSquares[i][j]="incheck"
+            }
+          }
+        }
+        this.setState({
+          miscSquares: miscSquares
+        });
+      }
+      else {
+        this.setState({
+          miscSquares: Array(8).fill(null).map(()=>Array(8).fill(null)),
+        });
+      } 
       pieceClickedRow = null; 
       pieceClickedCol = null; 
+      return; 
     }
     
     // TO DO: ONLY PLACE A PIECE IF A PIECE HAS BEEN CLICKED AND THE NEW SQUARE IS A LEGAL MOVE!!!
