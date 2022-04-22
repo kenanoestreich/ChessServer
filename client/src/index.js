@@ -214,6 +214,11 @@ class Game extends React.Component {
     let newTurn = this.state.whitesTurn; 
     newTurn = !newTurn; 
 
+    if (this.state.stepNumber!==history.length-1){
+      this.jumpTo(history.length-1);
+      return;
+    }
+
     if (newMiscSquares[i][j]==="threatened" || newMiscSquares[i][j]==="possible"){
       newSquares = movePiece(i,j,pieceClickedRow,pieceClickedCol,newSquares)
       history.push({squares: newSquares});
