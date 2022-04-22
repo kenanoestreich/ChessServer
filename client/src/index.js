@@ -329,6 +329,20 @@ class Game extends React.Component {
     const newMiscSquares = JSON.parse(JSON.stringify(this.state.miscSquares));
     const newSquares = current.squares;
 
+    // load all <li> tags first to avoid rendering warnings
+    // Maximum number of chess moves is 8848 according to a forum post on chess.com
+
+    // this is too hard for now
+
+    // let moves = document.createElement("ol"); 
+    // for (let i=0; i<8848; i++){
+    //   let j="item";
+    //   eval('let ' + j + i + "= " + `document.createElement("li");`)
+    //   eval(j + i + ".id= " + j + i + ";")  
+    //   eval(`moves.appendChild(" + j + i + ");`)
+    //   eval("let listRoot" + )
+    // }
+    
     const moves = history.map((step, move) => {
       if (move!==0){
         if (move%2===1) { //white's move most recent
@@ -348,7 +362,9 @@ class Game extends React.Component {
       }
       else{
         return (
-          <div></div>
+          <div id="start" key="start">
+            <button onClick={() => this.jumpTo(move)}>Game Start</button>
+          </div>
         );
       }
     });
@@ -825,9 +841,6 @@ function isKingCurrentlyInCheck(whitesTurn, squares){
           allThreatenedSquares = checkThreatenedSquares("Black",squares); 
           if (allThreatenedSquares[i][j]==="threatened"){
             miscSquares[i][j]="threatened"
-            this.setState({
-              miscSquares: miscSquares
-            })
             return true; 
           }
         }
@@ -841,9 +854,6 @@ function isKingCurrentlyInCheck(whitesTurn, squares){
           allThreatenedSquares = checkThreatenedSquares("White",squares); 
           if (allThreatenedSquares[i][j]==="threatened"){
             miscSquares[i][j]="threatened"
-            this.setState({
-              miscSquares: miscSquares
-            })
             return true; 
           }
         }
