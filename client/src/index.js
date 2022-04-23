@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import io from 'socket.io-client';
 let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
+
 // import App from './App';
 
 // const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -28,15 +29,18 @@ const blackPawn = '♟';
 const whitePieces = [whiteKing,whiteQueen,whiteRook,whiteBishop,whiteKnight,whitePawn];
 const blackPieces = [blackKing,blackQueen,blackRook,blackBishop,blackKnight,blackPawn];
 
+// Location of piece clicked for the sake of moving pieces
 let pieceClickedRow; 
 let pieceClickedCol;
 
-let whiteCount = 0;
-let blackCount = 0; 
-
+// Define root where Game will be rendered 
 const container = document.getElementById("root"); 
 const root = createRoot(container);
 
+// Define Square Object and its props
+// squareColor is used to track where pieces can move legally
+// onClick eventually refers back to handleClick()
+// value is the unicode of a piece or null
 function Square(props) {
   return (
     <button className={props.squareColor} onClick={props.onClick}>
@@ -45,7 +49,11 @@ function Square(props) {
   );
 }
 
+// Board Class 
+// 64 Squares of chess board 
 class Board extends React.Component {
+
+  // renderSquare() generates the square objects and assigns props based on inputs
   renderSquare(i,j,misc,squares) {
     if (misc==null){
       if (((i+j)%2)===1){
@@ -105,12 +113,14 @@ class Board extends React.Component {
     }
   }
 
+  // render function for the board itself
+  // renders all 64 squares with their correct options ("threatened", "possible", etc...)
   render() {
     const miscSquares = JSON.parse(JSON.stringify(this.props.miscSquares)); 
     const squares = JSON.parse(JSON.stringify(this.props.squares));
     return (
       <div>
-        <div className="board-row">
+        <div className="board-row"> 
           {this.renderSquare(0,0,miscSquares[0][0],squares)}
           {this.renderSquare(0,1,miscSquares[0][1],squares)}
           {this.renderSquare(0,2,miscSquares[0][2],squares)}
@@ -195,6 +205,9 @@ class Board extends React.Component {
   }
 }
 
+// Game Class; Contains state variables for history, stepNumber (move #), 
+// miscSquares (strings of "threatened", "possible", etc...), whitesTurn (is it White's turn?), 
+// list of black's and white's lost pieces
 class Game extends React.Component {
   constructor(props) {
     super(props);
@@ -217,6 +230,7 @@ class Game extends React.Component {
     };
   }
 
+  // Function to respond to clicking a square element
   handleClick(i,j) {
     let history = JSON.parse(JSON.stringify(this.state.history));
     const current = history[this.state.stepNumber];
@@ -227,16 +241,23 @@ class Game extends React.Component {
     let newTurn = this.state.whitesTurn; 
     newTurn = !newTurn; 
     let newTakenPieces = JSON.parse(JSON.stringify(this.state.takenPieces)); 
+    let whitesTurn = this.state.whitesTurn; 
 
+    // If not at the most recent move, move to the most recent move
     if (this.state.stepNumber!==history.length-1){
       this.jumpTo(history.length-1);
       return;
     }
 
+    // If the clicked square was highlighted as "threatened" (light red) or "possible" (light yellow),
+    // then we know the last piece we clicked can move there. The square wouldn't be highlighted if it 
+    // resulted in check, or if a blank square has been clicked since.
     if (newMiscSquares[i][j]==="threatened" || newMiscSquares[i][j]==="possible"){
+
+      // if the piece is taking another piece, we need to update the list of taken pieces
       if (newMiscSquares[i][j]==="threatened"){
         let takenPiece = newSquares[i][j];
-        if (this.state.whitesTurn){
+        if (whitesTurn){
           newTakenPieces.black.push(takenPiece);
           this.setState({
             takenPieces: newTakenPieces
@@ -249,24 +270,34 @@ class Game extends React.Component {
           })
         }
       }
+      
+      // generate a new board with the piece moved 
       newSquares = movePiece(i,j,pieceClickedRow,pieceClickedCol,newSquares)
-      if (isKingCurrentlyInCheck(!this.state.whitesTurn,newSquares)){ // if the opponent's king is in check
+      
+      // if the opponent's king is in check, display that on the board
+      if (isKingCurrentlyInCheck(!whitesTurn,newSquares)){ 
+
+        // add the new board state to history
         history.push({squares: newSquares});
+
+        // reset square color labels
         let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null))
+
         for (let i=0; i<8; i++){
           for (let j=0; j<8; j++){
-            if ((this.state.whitesTurn && newSquares[i][j]===blackKing) ||
-                (!this.state.whitesTurn && newSquares[i][j]===whiteKing)){
+            if ((whitesTurn && newSquares[i][j]===blackKing) ||
+                (!whitesTurn && newSquares[i][j]===whiteKing)){
               miscSquares[i][j]="incheck"
             }
           }
         }
+
         this.setState({
           history: history,
           whitesTurn: newTurn,
           stepNumber: newStep,
           miscSquares: miscSquares,
-      }) 
+        }) 
       }
       else {
         history.push({squares: newSquares});
@@ -280,190 +311,39 @@ class Game extends React.Component {
       return; 
     }
 
+    // If the game is Drawn By Insufficient Material, don't respond to clicks. 
     if (document.getElementById("status").innerHTML==="Game Drawn By Insufficient Material"){
       return;
     }
-    if (isCheckmate(this.state.whitesTurn, newSquares)||isStalemate(this.state.whitesTurn, newSquares)){
+
+    // If the game is Drawn by Stalemate or done by Checkmate, don't respond to clicks. 
+    if (isCheckmate(whitesTurn, newSquares)||isStalemate(whitesTurn, newSquares)){
       return; 
     }
     
-    // TO DO: CHECK FOR CHECKMATE!!!
-    // if (calculateWinner(squares)) {
-    //   return;
-    // }
+    // All the following sections refer to clicking one of the current player's pieces on their turn. 
+    // The square labels should be updated in this case, but nothing should be moved. 
 
-    // show bishop moves
+    let miscSquares = findPieceAndDisplay(i,j,whitesTurn,newSquares); 
+    if (miscSquares!==null){
+      this.setState({
+        miscSquares: miscSquares
+      }); 
 
-    if (current.squares[i][j]===blackBishop || current.squares[i][j]===whiteBishop) {
-      if (isKingCurrentlyInCheck(this.state.whitesTurn,current.squares)){
-        let miscSquares = displayBishopMoves(i,j,this.state.whitesTurn,current.squares); 
-        for (let i=0; i<8; i++){
-          for (let j=0; j<8; j++){
-            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
-                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
-              miscSquares[i][j]="incheck"
-            }
-          }
-        }
-        this.setState({
-          miscSquares: miscSquares
-        });
-      }
-      else {
-        this.setState({
-          miscSquares: displayBishopMoves(i,j,this.state.whitesTurn,current.squares),
-        });
-      }
-      
+      // remember this piece's location in case they take a piece with it. 
       pieceClickedRow = i; 
       pieceClickedCol = j; 
       return; 
     }
-
-    // show knight moves
-
-    if (current.squares[i][j]===blackKnight || current.squares[i][j]===whiteKnight) {
-      if (isKingCurrentlyInCheck(this.state.whitesTurn,current.squares)){
-        let miscSquares = displayKnightMoves(i,j,this.state.whitesTurn,current.squares); 
-        for (let i=0; i<8; i++){
-          for (let j=0; j<8; j++){
-            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
-                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
-              miscSquares[i][j]="incheck"
-            }
-          }
-        }
-        this.setState({
-          miscSquares: miscSquares
-        });
-      }
-      else {
-        this.setState({
-          miscSquares: displayKnightMoves(i,j,this.state.whitesTurn, current.squares),
-        });
-      }
-      pieceClickedRow = i; 
-      pieceClickedCol = j; 
-      return; 
-    }
-
-    // show pawn moves
-
-    if (current.squares[i][j]===blackPawn || current.squares[i][j]===whitePawn) {
-      if (isKingCurrentlyInCheck(this.state.whitesTurn,current.squares)){
-        let miscSquares = displayPawnMoves(i,j,this.state.whitesTurn,current.squares); 
-        for (let i=0; i<8; i++){
-          for (let j=0; j<8; j++){
-            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
-                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
-              miscSquares[i][j]="incheck"
-            }
-          }
-        }
-        this.setState({
-          miscSquares: miscSquares
-        });
-      }
-      else {
-        this.setState({
-          miscSquares: displayPawnMoves(i,j,this.state.whitesTurn, current.squares),
-        }); 
-      } 
-      pieceClickedRow = i; 
-      pieceClickedCol = j; 
-      return; 
-    }
-
-    // show rook moves
-
-    if (current.squares[i][j]===blackRook || current.squares[i][j]===whiteRook) {
-      if (isKingCurrentlyInCheck(this.state.whitesTurn,current.squares)){
-        let miscSquares = displayRookMoves(i,j,this.state.whitesTurn,current.squares); 
-        for (let i=0; i<8; i++){
-          for (let j=0; j<8; j++){
-            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
-                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
-              miscSquares[i][j]="incheck"
-            }
-          }
-        }
-        this.setState({
-          miscSquares: miscSquares
-        });
-      }
-      else {
-        this.setState({
-          miscSquares: displayRookMoves(i,j,this.state.whitesTurn, current.squares),
-        });
-      }
-      pieceClickedRow = i; 
-      pieceClickedCol = j; 
-      return;
-    }
-
-    // show queen moves
-
-    if (current.squares[i][j]===blackQueen || current.squares[i][j]===whiteQueen) {
-      if (isKingCurrentlyInCheck(this.state.whitesTurn,current.squares)){
-        let miscSquares = displayQueenMoves(i,j,this.state.whitesTurn,current.squares); 
-        for (let i=0; i<8; i++){
-          for (let j=0; j<8; j++){
-            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
-                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
-              miscSquares[i][j]="incheck"
-            }
-          }
-        }
-        this.setState({
-          miscSquares: miscSquares
-        });
-      }
-      else {
-        this.setState({
-          miscSquares: displayQueenMoves(i,j,this.state.whitesTurn, current.squares),
-        });
-      }
-      pieceClickedRow = i; 
-      pieceClickedCol = j; 
-      return;
-    }
-
-    // show king moves
-
-    if (current.squares[i][j]===blackKing || current.squares[i][j]===whiteKing) {
-      if (isKingCurrentlyInCheck(this.state.whitesTurn,current.squares)){
-        let miscSquares = displayKingMoves(i,j,this.state.whitesTurn,current.squares); 
-        for (let i=0; i<8; i++){
-          for (let j=0; j<8; j++){
-            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
-                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
-              miscSquares[i][j]="incheck"
-            }
-          }
-        }
-        this.setState({
-          miscSquares: miscSquares
-        });
-      }
-      else {
-        this.setState({
-          miscSquares: displayKingMoves(i,j,this.state.whitesTurn, current.squares),
-        });
-      }
-      pieceClickedRow = i; 
-      pieceClickedCol = j; 
-      return; 
-    }
-
-    // reset possible moves highlights
-
-    if (current.squares[i][j]===null){
-      if (isKingCurrentlyInCheck(this.state.whitesTurn,current.squares)){
+  
+    // reset possible moves highlights if the square clicked is labeled null
+    else {
+      if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
         let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
         for (let i=0; i<8; i++){
           for (let j=0; j<8; j++){
-            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
-                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
+            if ((whitesTurn && newSquares[i][j]===whiteKing) ||
+                (!whitesTurn && newSquares[i][j]===blackKing)){
               miscSquares[i][j]="incheck"
             }
           }
@@ -481,19 +361,6 @@ class Game extends React.Component {
       pieceClickedCol = null; 
       return; 
     }
-    
-    // TO DO: ONLY PLACE A PIECE IF A PIECE HAS BEEN CLICKED AND THE NEW SQUARE IS A LEGAL MOVE!!!
-    // squares[i][j] = this.state.whitesTurn ? "X" : "O"; 
-
-    // this.setState({
-    //   history: history.concat([
-    //     {
-    //       squares: squares
-    //     }
-    //   ]),
-    //   stepNumber: history.length,
-    //   whitesTurn: !this.state.whitesTurn
-    // });
   }
 
   jumpTo(step) {
@@ -552,8 +419,9 @@ class Game extends React.Component {
 
     let blackTakenPieces=this.state.takenPieces.black;
     let whiteTakenPieces=this.state.takenPieces.white;
-    whiteCount=0;
-    blackCount=0;   
+    // define counts for insufficient material check
+    let whiteCount = 0;
+    let blackCount = 0; 
     whiteTakenPieces.forEach(element => {
       if (element===whiteQueen || element===whiteRook || element===whitePawn){
         whiteCount++; 
@@ -1406,4 +1274,68 @@ function isStalemate(whitesTurn, squares){
   }
 }
 
+// function to determine clicked piece and call the correct display function
 
+// King, Queen, Rook, Bishop, Knight, Pawn
+function findPieceAndDisplay(pieceRow, pieceCol, whitesTurn, squares) {
+  let pieceNames = ["King","Queen","Rook","Bishop","Knight","Pawn"]; 
+  let firstPart = "let miscSquares = display";
+  let secondPart = "Moves(pieceRow,pieceCol,whitesTurn,squares);"
+  let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+  for (let i=0; i<6; i++){
+    if (squares[pieceRow][pieceCol]===whitePieces[i] || squares[pieceRow][pieceCol]===blackPieces[i]) {
+      if (isKingCurrentlyInCheck(whitesTurn,squares)){
+        let miscSquares;
+        if (i===0){
+          miscSquares = displayKingMoves(pieceRow,pieceCol,whitesTurn,squares); 
+        }
+        if (i===1){
+          miscSquares = displayQueenMoves(pieceRow,pieceCol,whitesTurn,squares); 
+        }
+        if (i===2){
+          miscSquares = displayRookMoves(pieceRow,pieceCol,whitesTurn,squares); 
+        }
+        if (i===3){
+          miscSquares = displayBishopMoves(pieceRow,pieceCol,whitesTurn,squares); 
+        }
+        if (i===4){
+          miscSquares = displayKnightMoves(pieceRow,pieceCol,whitesTurn,squares); 
+        }
+        if (i===5){
+          miscSquares = displayPawnMoves(pieceRow,pieceCol,whitesTurn,squares); 
+        }
+        // Find the checked king's location and highlight it as "incheck" (bright red)
+        for (let i=0; i<8; i++){
+          for (let j=0; j<8; j++){
+            if ((whitesTurn && squares[i][j]===whiteKing) ||
+                (!whitesTurn && squares[i][j]===blackKing)){
+              miscSquares[i][j]="incheck"
+            }
+          }
+        }
+        return miscSquares; 
+      }
+      else {
+        if (i===0){
+          return displayKingMoves(pieceRow,pieceCol,whitesTurn,squares);
+        }
+        if (i===1){
+          return displayQueenMoves(pieceRow,pieceCol,whitesTurn,squares);
+        }
+        if (i===2){
+          return displayRookMoves(pieceRow,pieceCol,whitesTurn,squares);
+        }
+        if (i===3){
+          return displayBishopMoves(pieceRow,pieceCol,whitesTurn,squares);
+        }
+        if (i===4){
+          return displayKnightMoves(pieceRow,pieceCol,whitesTurn,squares);
+        }
+        if (i===5){
+          return displayPawnMoves(pieceRow,pieceCol,whitesTurn,squares);
+        }
+      }
+    }
+  }
+  return null; 
+}
