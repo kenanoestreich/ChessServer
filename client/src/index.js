@@ -31,6 +31,9 @@ const blackPieces = [blackKing,blackQueen,blackRook,blackBishop,blackKnight,blac
 let pieceClickedRow; 
 let pieceClickedCol;
 
+let whiteCount = 0;
+let blackCount = 0; 
+
 const container = document.getElementById("root"); 
 const root = createRoot(container);
 
@@ -210,6 +213,7 @@ class Game extends React.Component {
       miscSquares: Array(8).fill(null).map(()=>Array(8).fill(null)),
       stepNumber: 0,
       whitesTurn: true,
+      takenPieces: {black: Array(0), white: Array(0)}
     };
   }
 
@@ -222,6 +226,7 @@ class Game extends React.Component {
     newStep++; 
     let newTurn = this.state.whitesTurn; 
     newTurn = !newTurn; 
+    let newTakenPieces = JSON.parse(JSON.stringify(this.state.takenPieces)); 
 
     if (this.state.stepNumber!==history.length-1){
       this.jumpTo(history.length-1);
@@ -229,14 +234,29 @@ class Game extends React.Component {
     }
 
     if (newMiscSquares[i][j]==="threatened" || newMiscSquares[i][j]==="possible"){
+      if (newMiscSquares[i][j]==="threatened"){
+        let takenPiece = newSquares[i][j];
+        if (this.state.whitesTurn){
+          newTakenPieces.black.push(takenPiece);
+          this.setState({
+            takenPieces: newTakenPieces
+          })
+        }
+        else{
+          newTakenPieces.white.push(takenPiece);
+          this.setState({
+            takenPieces: newTakenPieces
+          })
+        }
+      }
       newSquares = movePiece(i,j,pieceClickedRow,pieceClickedCol,newSquares)
-      if (isKingCurrentlyInCheck(this.state.whitesTurn,newSquares)){ // if the opponent's king is in check
+      if (isKingCurrentlyInCheck(!this.state.whitesTurn,newSquares)){ // if the opponent's king is in check
         history.push({squares: newSquares});
         let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null))
         for (let i=0; i<8; i++){
           for (let j=0; j<8; j++){
-            if ((this.state.whitesTurn && newSquares[i][j]===whiteKing) ||
-                (!this.state.whitesTurn && newSquares[i][j]===blackKing)){
+            if ((this.state.whitesTurn && newSquares[i][j]===blackKing) ||
+                (!this.state.whitesTurn && newSquares[i][j]===whiteKing)){
               miscSquares[i][j]="incheck"
             }
           }
@@ -245,7 +265,7 @@ class Game extends React.Component {
           history: history,
           whitesTurn: newTurn,
           stepNumber: newStep,
-          miscSquares: miscSquares
+          miscSquares: miscSquares,
       }) 
       }
       else {
@@ -259,7 +279,13 @@ class Game extends React.Component {
       }
       return; 
     }
-  
+
+    if (document.getElementById("status").innerHTML==="Game Drawn By Insufficient Material"){
+      return;
+    }
+    if (isCheckmate(this.state.whitesTurn, newSquares)||isStalemate(this.state.whitesTurn, newSquares)){
+      return; 
+    }
     
     // TO DO: CHECK FOR CHECKMATE!!!
     // if (calculateWinner(squares)) {
@@ -473,7 +499,8 @@ class Game extends React.Component {
   jumpTo(step) {
     this.setState({
       stepNumber: step,
-      whitesTurn: (step % 2) === 0
+      whitesTurn: (step % 2) === 0,
+      miscSquares: Array(8).fill(null).map(()=>Array(8).fill(null))
     });
   }
 
@@ -523,8 +550,39 @@ class Game extends React.Component {
       }
     });
 
+    let blackTakenPieces=this.state.takenPieces.black;
+    let whiteTakenPieces=this.state.takenPieces.white;
+    whiteCount=0;
+    blackCount=0;   
+    whiteTakenPieces.forEach(element => {
+      if (element===whiteQueen || element===whiteRook || element===whitePawn){
+        whiteCount++; 
+      }
+    }); 
+    blackTakenPieces.forEach(element => {
+      if (element===blackQueen || element===blackRook || element===blackPawn){
+        blackCount++; 
+      }
+    }); 
+
     let status;
-    status = "Next player: " + (this.state.whitesTurn ? "White" : "Black");
+    if (isCheckmate(this.state.whitesTurn,current.squares)){
+      status = (this.state.whitesTurn ? "Black" : "White") + " Won By Checkmate!";
+    }
+    else if (isStalemate(this.state.whitesTurn, current.squares)){
+      status = "Game Drawn By Stalemate";
+    }
+    else if (whiteTakenPieces.length>=14 && blackTakenPieces.length>=14){
+      if (blackCount===11 && whiteCount===11){
+        status = "Game Drawn By Insufficient Material"; 
+      }
+    }
+    else {
+      status = (this.state.whitesTurn ? "White's Turn" : "Black's Turn");
+    }
+    
+
+    let login; 
 
     return (
       <div className="game">
@@ -536,8 +594,15 @@ class Game extends React.Component {
           />
         </div>
         <div className="game-info">
-          <div>{status}</div>
+          <div id="status">{status}</div>
+          <br></br>
+          <div>Taken White Pieces: {whiteTakenPieces}</div>
+          <div>Taken Black Pieces: {blackTakenPieces}</div>
+          <br></br>
           <ol>{moves}</ol>
+        </div>
+        <div className="login">
+          {login}
         </div>
       </div>
     );
@@ -557,8 +622,57 @@ function calculateWinner(squares) {
 // input current board state and piece location to move and change css for all the 
 // legal move squares to highlight a new color. 
 
+// ALL THE "display______Threats" FUNCTIONS EXIST TO AVOID INFINITE LOOPS. 
+
 // Knights
 function displayKnightMoves(currentPieceRow, currentPieceCol, whitesTurn, squares) {
+  let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+  let newSquares;
+  let squares_copy;
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackKnight) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteKnight)){
+    return miscSquares; 
+  }
+  let possibleSquares = [];
+  possibleSquares.push([currentPieceRow-2, currentPieceCol-1]);
+  possibleSquares.push([currentPieceRow-2, currentPieceCol+1]);
+  possibleSquares.push([currentPieceRow-1, currentPieceCol-2]);
+  possibleSquares.push([currentPieceRow-1, currentPieceCol+2]);
+  possibleSquares.push([currentPieceRow+1, currentPieceCol-2]);
+  possibleSquares.push([currentPieceRow+1, currentPieceCol+2]);
+  possibleSquares.push([currentPieceRow+2, currentPieceCol-1]);
+  possibleSquares.push([currentPieceRow+2, currentPieceCol+1]); 
+  for (let i=0; i<possibleSquares.length; i++) {
+    if (possibleSquares[i][0] >= 0 && possibleSquares[i][0] < 8 && 
+        possibleSquares[i][1] >= 0 && possibleSquares[i][1] < 8) {  
+      if ((whitesTurn && blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
+          || (!whitesTurn && whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
+        miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="threatened";
+        squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(possibleSquares[i][0],possibleSquares[i][1],currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+          miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]=null; 
+        }
+      }
+      else if ((!whitesTurn && blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
+          || (whitesTurn && whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
+      }
+      else {
+        miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="possible";
+        squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(possibleSquares[i][0],possibleSquares[i][1],currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+          miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]=null; 
+        }
+      }
+    }
+  }
+  miscSquares[currentPieceRow][currentPieceCol]="selected";
+  return miscSquares;
+}
+
+// To be used in isKingCurrentlyInCheck()
+function displayKnightThreats(currentPieceRow, currentPieceCol, whitesTurn, squares) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
   if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackKnight) 
       || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteKnight)){
@@ -611,9 +725,29 @@ function displayBishopMoves(currentPieceRow, currentPieceCol, whitesTurn, square
   return miscSquares; 
 }
 
+function displayBishopThreats(currentPieceRow, currentPieceCol, whitesTurn, squares) {
+  let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackBishop) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteBishop)){
+    return miscSquares; 
+  }
+  // up and left "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,-1,-1,squares,miscSquares,whitesTurn);
+  // up and right "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,+1,-1,squares,miscSquares,whitesTurn)
+  // down and left "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,-1,+1,squares,miscSquares,whitesTurn)
+  // down and right "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,+1,+1,squares,miscSquares,whitesTurn)
+  miscSquares[currentPieceRow][currentPieceCol]="selected";
+  return miscSquares; 
+}
+
 // Pawns
 function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, squares) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+  let newSquares;
+  let squares_copy;
   if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackPawn) 
       || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whitePawn)){
     return miscSquares; 
@@ -622,19 +756,39 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, squares)
   // white pawn hasn't moved yet
   if (whitesTurn && currentPieceRow===6) {
     if (squares[currentPieceRow-1][currentPieceCol]===null){
-      miscSquares[currentPieceRow-1][currentPieceCol]="possible"; 
+      miscSquares[currentPieceRow-1][currentPieceCol]="possible";
+      squares_copy = JSON.parse(JSON.stringify(squares)); 
+      newSquares = movePiece(currentPieceRow-1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
+      if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+        miscSquares[currentPieceRow-1][currentPieceCol]=null; 
+      } 
       if (squares[currentPieceRow-2][currentPieceCol]===null){
         miscSquares[currentPieceRow-2][currentPieceCol]="possible"; 
+        squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(currentPieceRow-2,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+          miscSquares[currentPieceRow-2][currentPieceCol]=null; 
+        }
       }
     }
     if ((currentPieceCol-1)>=0){
       if (blackPieces.includes(squares[currentPieceRow-1][currentPieceCol-1])){
         miscSquares[currentPieceRow-1][currentPieceCol-1]="threatened"; 
+        squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(currentPieceRow-1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+          miscSquares[currentPieceRow-1][currentPieceCol-1]=null; 
+        }
       }
     }
     if ((currentPieceCol+1)<8){
       if (blackPieces.includes(squares[currentPieceRow-1][currentPieceCol+1])){
         miscSquares[currentPieceRow-1][currentPieceCol+1]="threatened"; 
+        squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(currentPieceRow-1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+          miscSquares[currentPieceRow-1][currentPieceCol+1]=null; 
+        }
       }
     }
   }
@@ -642,19 +796,39 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, squares)
   // black pawn hasn't moved yet
   if (!whitesTurn && currentPieceRow===1) {
     if (squares[currentPieceRow+1][currentPieceCol]===null){
-      miscSquares[currentPieceRow+1][currentPieceCol]="possible"; 
+      miscSquares[currentPieceRow+1][currentPieceCol]="possible"
+      squares_copy = JSON.parse(JSON.stringify(squares)); 
+      newSquares = movePiece(currentPieceRow+1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
+      if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+        miscSquares[currentPieceRow+1][currentPieceCol]=null; 
+      } 
       if (squares[currentPieceRow+2][currentPieceCol]===null){
         miscSquares[currentPieceRow+2][currentPieceCol]="possible"; 
+        let squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(currentPieceRow+2,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+          miscSquares[currentPieceRow+2][currentPieceCol]=null; 
+        }
       }
     }
     if ((currentPieceCol-1)>=0){
       if (whitePieces.includes(squares[currentPieceRow+1][currentPieceCol-1])){
         miscSquares[currentPieceRow+1][currentPieceCol-1]="threatened"; 
+        squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(currentPieceRow+1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+          miscSquares[currentPieceRow+1][currentPieceCol]=null; 
+        }
       }
     }
     if ((currentPieceCol+1)<8){
       if (whitePieces.includes(squares[currentPieceRow+1][currentPieceCol+1])){
         miscSquares[currentPieceRow+1][currentPieceCol+1]="threatened"; 
+        squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(currentPieceRow+1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+          miscSquares[currentPieceRow+1][currentPieceCol+1]=null; 
+        }
       }
     }
   }
@@ -663,15 +837,30 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, squares)
   if (whitesTurn && currentPieceRow!==6) {
     if (squares[currentPieceRow-1][currentPieceCol]===null){
       miscSquares[currentPieceRow-1][currentPieceCol]="possible"; 
+      squares_copy = JSON.parse(JSON.stringify(squares)); 
+      newSquares = movePiece(currentPieceRow-1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
+      if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+        miscSquares[currentPieceRow-1][currentPieceCol]=null; 
+      }
     }
     if ((currentPieceCol-1)>=0){
       if (blackPieces.includes(squares[currentPieceRow-1][currentPieceCol-1])){
         miscSquares[currentPieceRow-1][currentPieceCol-1]="threatened"; 
+        squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(currentPieceRow-1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+          miscSquares[currentPieceRow-1][currentPieceCol-1]=null; 
+        }
       }
     }
     if ((currentPieceCol+1)<8){
       if (blackPieces.includes(squares[currentPieceRow-1][currentPieceCol+1])){
         miscSquares[currentPieceRow-1][currentPieceCol+1]="threatened"; 
+        squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(currentPieceRow-1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+          miscSquares[currentPieceRow-1][currentPieceCol+1]=null; 
+        }
       }
     }
   }
@@ -680,15 +869,30 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, squares)
   if (!whitesTurn && currentPieceRow!==1) {
     if (squares[currentPieceRow+1][currentPieceCol]===null){
       miscSquares[currentPieceRow+1][currentPieceCol]="possible"; 
+      squares_copy = JSON.parse(JSON.stringify(squares)); 
+      newSquares = movePiece(currentPieceRow+1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
+      if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+        miscSquares[currentPieceRow+1][currentPieceCol]=null; 
+      }
     }
     if ((currentPieceCol-1)>=0){
       if (whitePieces.includes(squares[currentPieceRow+1][currentPieceCol-1])){
         miscSquares[currentPieceRow+1][currentPieceCol-1]="threatened"; 
+        squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(currentPieceRow+1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+          miscSquares[currentPieceRow+1][currentPieceCol-1]=null; 
+        }
       }
     }
     if ((currentPieceCol+1)<8){
       if (whitePieces.includes(squares[currentPieceRow+1][currentPieceCol+1])){
         miscSquares[currentPieceRow+1][currentPieceCol+1]="threatened"; 
+        squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(currentPieceRow+1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+          miscSquares[currentPieceRow+1][currentPieceCol+1]=null; 
+        }
       }
     }
   }
@@ -745,6 +949,24 @@ function displayRookMoves(currentPieceRow, currentPieceCol, whitesTurn, squares)
   return miscSquares; 
 }
 
+function displayRookThreats(currentPieceRow, currentPieceCol, whitesTurn, squares) {
+  let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackRook) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteRook)){
+    return miscSquares; 
+  }
+  // up "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,0,-1,squares,miscSquares,whitesTurn);
+  // down "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,0,+1,squares,miscSquares,whitesTurn)
+  // left "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,-1,0,squares,miscSquares,whitesTurn)
+  // right "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,+1,0,squares,miscSquares,whitesTurn)
+  miscSquares[currentPieceRow][currentPieceCol]="selected";
+  return miscSquares; 
+}
+
 // Queens
 function displayQueenMoves(currentPieceRow, currentPieceCol, whitesTurn, squares) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
@@ -768,6 +990,32 @@ function displayQueenMoves(currentPieceRow, currentPieceCol, whitesTurn, squares
   miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,+1,squares,miscSquares,whitesTurn)
   // down and right "line of sight"
   miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,+1,squares,miscSquares,whitesTurn)
+  miscSquares[currentPieceRow][currentPieceCol]="selected";
+  return miscSquares; 
+}
+
+function displayQueenThreats(currentPieceRow, currentPieceCol, whitesTurn, squares) {
+  let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackQueen) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteQueen)){
+    return miscSquares; 
+  }
+  // up "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,0,-1,squares,miscSquares,whitesTurn)
+  // down "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,0,+1,squares,miscSquares,whitesTurn)
+  // left "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,-1,0,squares,miscSquares,whitesTurn)
+  // right "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,+1,0,squares,miscSquares,whitesTurn)
+  // up and left "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,-1,-1,squares,miscSquares,whitesTurn)
+  // up and right "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,+1,-1,squares,miscSquares,whitesTurn)
+  // down and left "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,-1,+1,squares,miscSquares,whitesTurn)
+  // down and right "line of sight"
+  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,+1,+1,squares,miscSquares,whitesTurn)
   miscSquares[currentPieceRow][currentPieceCol]="selected";
   return miscSquares; 
 }
@@ -880,12 +1128,46 @@ function displayKingThreats(currentPieceRow, currentPieceCol, whitesTurn, square
       }
     }
   }
-  
   return miscSquares;
 }
 
 // helper function for bishops, rooks, and queens
 function checkAxis(currentPieceRow, currentPieceCol, rowDelta, colDelta, squares, miscSquares, whitesTurn){
+  let i=currentPieceRow+rowDelta;
+  let j=currentPieceCol+colDelta; 
+  let squares_copy;
+  let newSquares;
+  while (i < 8 && i >=0 && j < 8 && j >=0) {
+    if (squares[i][j]===null){
+      miscSquares[i][j]="possible"; 
+      squares_copy = JSON.parse(JSON.stringify(squares)); 
+      newSquares = movePiece(i,j,currentPieceRow,currentPieceCol,squares_copy)
+      if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+        miscSquares[i][j]=null; 
+      }
+    }
+    else if ((whitesTurn && whitePieces.includes(squares[i][j]))
+      || (!whitesTurn && blackPieces.includes(squares[i][j]))){
+      break; 
+    }
+    else if ((whitesTurn && blackPieces.includes(squares[i][j]))
+      || (!whitesTurn && whitePieces.includes(squares[i][j]))){
+      miscSquares[i][j]="threatened";
+      squares_copy = JSON.parse(JSON.stringify(squares)); 
+      newSquares = movePiece(i,j,currentPieceRow,currentPieceCol,squares_copy)
+      if (isKingCurrentlyInCheck(whitesTurn,newSquares)){
+        miscSquares[i][j]=null; 
+      }
+      break; 
+    }
+    i+=rowDelta
+    j+=colDelta;
+  }
+  return miscSquares;
+}
+
+// alternate CheckAxis that doesn't care about putting the king in check. 
+function checkAxisAlternate(currentPieceRow, currentPieceCol, rowDelta, colDelta, squares, miscSquares, whitesTurn){
   let i=currentPieceRow+rowDelta;
   let j=currentPieceCol+colDelta; 
   while (i < 8 && i >=0 && j < 8 && j >=0) {
@@ -901,7 +1183,7 @@ function checkAxis(currentPieceRow, currentPieceCol, rowDelta, colDelta, squares
       miscSquares[i][j]="threatened";
       break; 
     }
-    i+=rowDelta
+    i+=rowDelta;
     j+=colDelta;
   }
   return miscSquares;
@@ -910,13 +1192,8 @@ function checkAxis(currentPieceRow, currentPieceCol, rowDelta, colDelta, squares
 // Function for actually moving the pieces
 function movePiece(endRow, endCol, startRow, startCol, squares){
   let startpiece = squares[startRow][startCol];
-  let endpiece=null;
-  if (squares[endRow][endCol]!==null){
-    endpiece = squares[endRow][endCol];
-  }
   squares[startRow][startCol]=null; 
-  squares[endRow][endCol]=startpiece; 
-  // logTakenPiece(endpiece) 
+  squares[endRow][endCol]=startpiece;
   return squares; 
 }
 
@@ -934,19 +1211,19 @@ function checkThreatenedSquares(opponentColor, squares){
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
         else if (squares[i][j]===blackRook){
-          pieceThreats=displayRookMoves(i,j,false,squares); 
+          pieceThreats=displayRookThreats(i,j,false,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
         else if (squares[i][j]===blackKnight){
-          pieceThreats=displayKnightMoves(i,j,false,squares); 
+          pieceThreats=displayKnightThreats(i,j,false,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
         else if (squares[i][j]===blackBishop){
-          pieceThreats=displayBishopMoves(i,j,false,squares); 
+          pieceThreats=displayBishopThreats(i,j,false,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
         else if (squares[i][j]===blackQueen){
-          pieceThreats=displayQueenMoves(i,j,false,squares); 
+          pieceThreats=displayQueenThreats(i,j,false,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
         else if (squares[i][j]===blackKing){
@@ -966,19 +1243,19 @@ function checkThreatenedSquares(opponentColor, squares){
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
         else if (squares[i][j]===whiteRook){
-          pieceThreats=displayRookMoves(i,j,true,squares); 
+          pieceThreats=displayRookThreats(i,j,true,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
         else if (squares[i][j]===whiteKnight){
-          pieceThreats=displayKnightMoves(i,j,true,squares); 
+          pieceThreats=displayKnightThreats(i,j,true,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
         else if (squares[i][j]===whiteBishop){
-          pieceThreats=displayBishopMoves(i,j,true,squares); 
+          pieceThreats=displayBishopThreats(i,j,true,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
         else if (squares[i][j]===whiteQueen){
-          pieceThreats=displayQueenMoves(i,j,true,squares); 
+          pieceThreats=displayQueenThreats(i,j,true,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
         else if (squares[i][j]===whiteKing){
@@ -1034,7 +1311,99 @@ function isKingCurrentlyInCheck(whitesTurn, squares){
   return false; 
 }
 
-// Function to add a piece to the list of taken pieces
-// function logTakenPiece(endpiece){
+function isCheckmate(whitesTurn, squares){
+  let legalMoves = Array(8).fill(null).map(()=>Array(8).fill(null));
+  let pieceMoves; 
+  if (isKingCurrentlyInCheck(whitesTurn, squares)){
+    for (let i=0; i<8; i++){
+      for (let j=0; j<8; j++){
+        if ((whitesTurn && whitePieces.includes(squares[i][j])) ||
+          (!whitesTurn && blackPieces.includes(squares[i][j]))) {
+          if ((whitesTurn && squares[i][j]===whiteKnight) || (!whitesTurn && squares[i][j]===blackKnight)){
+            pieceMoves = displayKnightMoves(i,j,whitesTurn,squares);
+            legalMoves = squaresCombiner(pieceMoves, legalMoves); 
+          }
+          if ((whitesTurn && squares[i][j]===whitePawn) || (!whitesTurn && squares[i][j]===blackPawn)){
+            pieceMoves = displayPawnMoves(i,j,whitesTurn,squares);
+            legalMoves = squaresCombiner(pieceMoves, legalMoves); 
+          }
+          if ((whitesTurn && squares[i][j]===whiteBishop) || (!whitesTurn && squares[i][j]===blackBishop)){
+            pieceMoves = displayBishopMoves(i,j,whitesTurn,squares);
+            legalMoves = squaresCombiner(pieceMoves, legalMoves); 
+          }
+          if ((whitesTurn && squares[i][j]===whiteQueen) || (!whitesTurn && squares[i][j]===blackQueen)){
+            pieceMoves = displayQueenMoves(i,j,whitesTurn,squares);
+            legalMoves = squaresCombiner(pieceMoves, legalMoves); 
+          }
+          if ((whitesTurn && squares[i][j]===whiteKing) || (!whitesTurn && squares[i][j]===blackKing)){
+            pieceMoves = displayKingMoves(i,j,whitesTurn,squares);
+            legalMoves = squaresCombiner(pieceMoves, legalMoves); 
+          }
+          if ((whitesTurn && squares[i][j]===whiteRook) || (!whitesTurn && squares[i][j]===blackRook)){
+            pieceMoves = displayRookMoves(i,j,whitesTurn,squares);
+            legalMoves = squaresCombiner(pieceMoves, legalMoves); 
+          }
 
-// }
+        }
+        for (let k=0; k<8; k++){
+          if (legalMoves[k].includes("threatened")){
+            return false; 
+          }
+        }
+      }
+    }
+    return true; 
+  }
+  else{
+    return false; 
+  }
+}
+
+function isStalemate(whitesTurn, squares){
+  let legalMoves = Array(8).fill(null).map(()=>Array(8).fill(null));
+  let pieceMoves; 
+  if (!isKingCurrentlyInCheck(whitesTurn, squares)){
+    for (let i=0; i<8; i++){
+      for (let j=0; j<8; j++){
+        if ((whitesTurn && whitePieces.includes(squares[i][j])) ||
+          (!whitesTurn && blackPieces.includes(squares[i][j]))) {
+          if ((whitesTurn && squares[i][j]===whiteKnight) || (!whitesTurn && squares[i][j]===blackKnight)){
+            pieceMoves = displayKnightMoves(i,j,whitesTurn,squares);
+            legalMoves = squaresCombiner(pieceMoves, legalMoves); 
+          }
+          if ((whitesTurn && squares[i][j]===whitePawn) || (!whitesTurn && squares[i][j]===blackPawn)){
+            pieceMoves = displayPawnMoves(i,j,whitesTurn,squares);
+            legalMoves = squaresCombiner(pieceMoves, legalMoves); 
+          }
+          if ((whitesTurn && squares[i][j]===whiteBishop) || (!whitesTurn && squares[i][j]===blackBishop)){
+            pieceMoves = displayBishopMoves(i,j,whitesTurn,squares);
+            legalMoves = squaresCombiner(pieceMoves, legalMoves); 
+          }
+          if ((whitesTurn && squares[i][j]===whiteQueen) || (!whitesTurn && squares[i][j]===blackQueen)){
+            pieceMoves = displayQueenMoves(i,j,whitesTurn,squares);
+            legalMoves = squaresCombiner(pieceMoves, legalMoves); 
+          }
+          if ((whitesTurn && squares[i][j]===whiteKing) || (!whitesTurn && squares[i][j]===blackKing)){
+            pieceMoves = displayKingMoves(i,j,whitesTurn,squares);
+            legalMoves = squaresCombiner(pieceMoves, legalMoves); 
+          }
+          if ((whitesTurn && squares[i][j]===whiteRook) || (!whitesTurn && squares[i][j]===blackRook)){
+            pieceMoves = displayRookMoves(i,j,whitesTurn,squares);
+            legalMoves = squaresCombiner(pieceMoves, legalMoves); 
+          }
+        }
+        for (let k=0; k<8; k++){
+          if (legalMoves[k].includes("threatened")){
+            return false; 
+          }
+        }
+      }
+    }
+    return true; 
+  }
+  else{
+    return false; 
+  }
+}
+
+
