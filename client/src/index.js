@@ -29,6 +29,9 @@ const blackPawn = '♟';
 const whitePieces = [whiteKing,whiteQueen,whiteRook,whiteBishop,whiteKnight,whitePawn];
 const blackPieces = [blackKing,blackQueen,blackRook,blackBishop,blackKnight,blackPawn];
 
+// array of roots so we don't get a warning for calling createRoot() multiple times on the same element.
+let roots=Array(8848).fill(null); // maximum possible number of moves
+
 // Location of piece clicked for the sake of moving pieces
 let pieceClickedRow; 
 let pieceClickedCol;
@@ -376,35 +379,25 @@ class Game extends React.Component {
     const current = history[this.state.stepNumber];
     const newMiscSquares = JSON.parse(JSON.stringify(this.state.miscSquares));
     const newSquares = current.squares;
-
-    // load all <li> tags first to avoid rendering warnings
-    // Maximum number of chess moves is 8848 according to a forum post on chess.com
-
-    // this is too hard for now
-
-    // let moves = document.createElement("ol"); 
-    // for (let i=0; i<8848; i++){
-    //   let j="item";
-    //   eval('let ' + j + i + "= " + `document.createElement("li");`)
-    //   eval(j + i + ".id= " + j + i + ";")  
-    //   eval(`moves.appendChild(" + j + i + ");`)
-    //   eval("let listRoot" + )
-    // }
     
     const moves = history.map((step, move) => {
       if (move!==0){
         if (move%2===1) { //white's move most recent
           const desc = "White's Move"
-          return (
-            <li id={move} key={move}>
-              <button onClick={() => this.jumpTo(move)}>{desc}</button>
-            </li>
-          );
+          if (document.getElementById({move})===null){
+            return (
+              <li id={move} key={move}>
+                <button onClick={() => this.jumpTo(move)}>{desc}</button>
+              </li>
+            );
+          }
         }
         else if (move%2===0) {
           const desc = "Black's Move"
-          const root = createRoot(document.getElementById(move-1));
-          root.render(<span><button onClick={() => this.jumpTo(move-1)}>White's Move</button>
+          if (roots[move]===null){
+            roots[move] = createRoot(document.getElementById(move-1));
+          }
+          roots[move].render(<span><button onClick={() => this.jumpTo(move-1)}>White's Move</button>
           <button onClick={() => this.jumpTo(move)}>{desc}</button></span>)
         }
       }
