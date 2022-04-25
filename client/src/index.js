@@ -4,15 +4,6 @@ import './index.css';
 import io from 'socket.io-client';
 let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
 
-// import App from './App';
-
-// const root = ReactDOM.createRoot(document.getElementById('root'));
-// root.render(
-//   <React.StrictMode>
-//     <App />
-//   </React.StrictMode>
-// );
-
 // enumerations for unicodes to make code readable
 const whiteKing = '♔'; 
 const whiteQueen = '♕';
@@ -32,6 +23,9 @@ const blackPieces = [blackKing,blackQueen,blackRook,blackBishop,blackKnight,blac
 // array of roots so we don't get a warning for calling createRoot() multiple times on the same element.
 let roots=Array(8848).fill(null); // maximum possible number of moves
 
+// Is the user logged in?
+let loggedIn=false; 
+
 // Location of piece clicked for the sake of moving pieces
 let pieceClickedRow; 
 let pieceClickedCol;
@@ -47,6 +41,14 @@ const root = createRoot(container);
 function Square(props) {
   return (
     <button className={props.squareColor} onClick={props.onClick}>
+      {props.value}
+    </button>
+  );
+}
+
+function ListItem(props) {
+  return (
+    <button onClick={props.onClick}>
       {props.value}
     </button>
   );
@@ -366,6 +368,7 @@ class Game extends React.Component {
     }
   }
 
+  // function bound to history buttons
   jumpTo(step) {
     this.setState({
       stepNumber: step,
@@ -387,11 +390,12 @@ class Game extends React.Component {
           if (document.getElementById({move})===null){
             return (
               <li id={move} key={move}>
-                <button onClick={() => this.jumpTo(move)}>{desc}</button>
+                <span><button onClick={() => this.jumpTo(move)}>{desc}</button></span>
               </li>
             );
           }
         }
+        // If I have time, fix this warning. Don't call render() within render()
         else if (move%2===0) {
           const desc = "Black's Move"
           if (roots[move]===null){
@@ -443,8 +447,6 @@ class Game extends React.Component {
     }
     
 
-    let login; 
-
     return (
       <div className="game">
         <div className="game-board">
@@ -455,6 +457,7 @@ class Game extends React.Component {
           />
         </div>
         <div className="game-info">
+          <div id="login">{sessionStorage.getItem("currentUser")}</div>
           <div id="status">{status}</div>
           <br></br>
           <div>Taken White Pieces: {whiteTakenPieces}</div>
@@ -462,22 +465,83 @@ class Game extends React.Component {
           <br></br>
           <ol>{moves}</ol>
         </div>
-        <div className="login">
-          {login}
-        </div>
       </div>
     );
   }
 }
 
+class LoginForm extends React.Component{
+  constructor(props){
+  super(props);
+  this.state = {
+    LoginError: ""
+  }
+
+  }
+
+  loggedIn() {
+    let tryusername = document.getElementById("username").value; 
+    sessionStorage.setItem("currentUser",tryusername);
+    console.log(tryusername + " Successfully Logged In!")
+    this.render(); 
+  }
+
+  loginFailure(){
+    console.log("Log in attempt FAILED!!!")
+    this.setState({
+      LoginError: "Incorrect Username/Password"
+    })
+  }
+  attemptLogin(){
+    let tryusername = document.getElementById("username").value; 
+    let trypassword = document.getElementById("password").value; 
+    socket.emit("LoginAttempt", {username: tryusername, password: trypassword});
+    socket.on("LoginSuccess", () => this.loggedIn());
+    socket.on("LoginFailure", () => this.loginFailure());
+  }
+
+  register(){
+    let tryusername = document.getElementById("username").value; 
+    let trypassword = document.getElementById("password").value; 
+    socket.emit("RegisterUser", {username: tryusername, password: trypassword});
+    socket.on("UserAlreadyExists", ()=>this.usernameTaken());
+    socket.on("LoginSuccess", () => this.loggedIn());
+  }
+
+  usernameTaken(){
+    this.setState({
+      LoginError: "Username Taken"
+    })
+  }
+
+  render(){
+    if(sessionStorage.getItem("currentUser")===null){
+        return(
+          <div>
+            <h1>Login</h1>
+              <h2>
+                Enter Username: <br></br><input type = "text" id = "username"></input> <br></br><br></br>
+                Enter Password: <br></br><input type = "password" id = "password"></input>
+              </h2>
+                <div id="LogInError"><br></br>{this.state.LoginError}</div><br></br>
+                <button id = "login_btn" onClick={()=>this.attemptLogin()}>Log In</button>
+                <br></br><br></br>Don't have an account? <button id="signup_btn" onClick={() =>this.register()}>Sign Up!</button>
+          </div>
+      );
+    }else{
+      root.render(<Game/>);
+    }
+  }
+}
+
 // ========================================
 
-root.render(<Game />); 
+if(loggedIn === true){
+  root.render(<Game />); 
+}else{
+  root.render(<LoginForm />);
+} 
 
-function calculateWinner(squares) {
-  // Calculate if checkmate or stalemate
-  return null;
-}
 
 // ALL THE "display_____Moves" FUNCTIONS DO THE FOLLOWING (ONLY DIFFERENCE IS HOW THAT PIECE MOVES):
 // input current board state and piece location to move and change css for all the 
@@ -1271,10 +1335,6 @@ function isStalemate(whitesTurn, squares){
 
 // King, Queen, Rook, Bishop, Knight, Pawn
 function findPieceAndDisplay(pieceRow, pieceCol, whitesTurn, squares) {
-  let pieceNames = ["King","Queen","Rook","Bishop","Knight","Pawn"]; 
-  let firstPart = "let miscSquares = display";
-  let secondPart = "Moves(pieceRow,pieceCol,whitesTurn,squares);"
-  let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
   for (let i=0; i<6; i++){
     if (squares[pieceRow][pieceCol]===whitePieces[i] || squares[pieceRow][pieceCol]===blackPieces[i]) {
       if (isKingCurrentlyInCheck(whitesTurn,squares)){
