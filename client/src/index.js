@@ -521,6 +521,12 @@ class LoginForm extends React.Component{
     }
   }
 
+  componentDidMount(){
+    socket.on("LoginSuccess", () => this.loggedIn());
+    socket.on("LoginFailure", () => this.loginFailure());
+    socket.on("UserAlreadyExists", ()=>this.usernameTaken());
+  }
+
   loggedIn() {
     let tryusername = document.getElementById("username").value; 
     sessionStorage.setItem("currentUser",tryusername);
@@ -538,16 +544,13 @@ class LoginForm extends React.Component{
     let tryusername = document.getElementById("username").value; 
     let trypassword = document.getElementById("password").value; 
     socket.emit("LoginAttempt", {username: tryusername, password: trypassword});
-    socket.on("LoginSuccess", () => this.loggedIn());
-    socket.on("LoginFailure", () => this.loginFailure());
+    
   }
 
   register(){
     let tryusername = document.getElementById("username").value; 
     let trypassword = document.getElementById("password").value; 
     socket.emit("RegisterUser", {username: tryusername, password: trypassword});
-    socket.on("UserAlreadyExists", ()=>this.usernameTaken());
-    socket.on("LoginSuccess", () => this.loggedIn());
   }
 
   usernameTaken(){
