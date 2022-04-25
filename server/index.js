@@ -12,6 +12,10 @@ const PORT = process.env.PORT || 3456;
 
 const connection = mysql.createConnection({
   host: 'localhost',
+  /* FOR RICO:
+  user: 'root',
+  password: 'Rock2001',
+  */
   user: 'wustl_inst',
   password: 'wustl_pass',
   database: 'Chess'
@@ -19,6 +23,7 @@ const connection = mysql.createConnection({
 
 const io = require("socket.io")(http,{
   cors:{
+   //FOR RICO: origin: 'http://ec2-44-202-148-202.compute-1.amazonaws.com:3000',
     origin: 'http://ec2-184-73-74-122.compute-1.amazonaws.com:3000',
     methods: ["GET", "POST"]
   }
@@ -108,29 +113,43 @@ io.on('connection', function(socket){
   
   socket.on("JoinLobby", function(data) {
     let gametime = data["TimeControl"];
+    let username = data["username"];
     if(gametime == 1){
-      getopponent(OneMin);
+      console.log(`${username} joined game`);
+      getopponent(OneMin,username);
     }else if(gametime == 5){
-      getopponent(FiveMin);
+      getopponent(FiveMin,username);
     }else if(gametime == 10){
-      getopponent(TenMin);
+      getopponent(TenMin,username);
     }else if(gametime == 30){
-      getopponent(ThirtyMin);
+      getopponent(ThirtyMin,username);
     }
   });
 
-  function getopponent(lobby){
+  function getopponent(lobby,username){
     if(lobby[0]!=null){
-      let opponent_id = lobby[0];
+      let opponent_id = lobby[0][0];
+      let opponent_name = lobby[0][1];
+      let player_name = username;
       let index = lobby.indexOf(opponent_id);
       lobby.splice(index,1);
-      socket.join(opponent_id+socket.id); 
-      let opponent_socket = io.of('/').sockets.get(opponent_id);
-      opponent_socket.join(opponent_id+socket.id);
-      io.to(opponent_id+socket.id).emit("StartGame", {roomname: opponent_id+socket.id}); 
-      console.log("New Game Name " + opponent_id+socket.id);
+      socket.join(opponent_name+"_"+player_name); 
+      let opponent_socket = io.sockets.sockets.get(opponent_id);
+      console.log("opponent: " + opponent_id);
+      opponent_socket.join(opponent_name+"_"+player_name);
+      let players;
+      let choose = Math.random() < 0.5 ? players = [opponent_name,player_name] : players = [player_name, opponent_name];
+      console.log(players);
+   //   if(socket.id == opponent_id){
+        io.to(opponent_name+"_"+player_name).emit("StartGame", {roomname: opponent_name+"_"+player_name, players: players}); 
+        console.log([opponent_name,player_name])
+    //  }else{
+    //    io.to(opponent_id+socket.id).emit("StartGame", {roomname: opponent_id+socket.id, color: black});
+   //   }
+      console.log("New Game Name " + opponent_name+"_"+player_name);
+      
     }else{
-      lobby.push(socket.id);
+      lobby.push([socket.id,username]);
       console.log("First Join Lobby: " + lobby);
     }
   }

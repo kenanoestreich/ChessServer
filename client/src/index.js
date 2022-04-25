@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import io from 'socket.io-client';
+//FOR RICO: let socket = io("http://ec2-44-202-148-202.compute-1.amazonaws.com:3456/");
 let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
 
 // enumerations for unicodes to make code readable
@@ -19,6 +20,8 @@ const blackKnight = '♞';
 const blackPawn = '♟';
 const whitePieces = [whiteKing,whiteQueen,whiteRook,whiteBishop,whiteKnight,whitePawn];
 const blackPieces = [blackKing,blackQueen,blackRook,blackBishop,blackKnight,blackPawn];
+
+let your_color;
 
 // array of roots so we don't get a warning for calling createRoot() multiple times on the same element.
 let roots=Array(8848).fill(null); // maximum possible number of moves
@@ -469,12 +472,19 @@ class LobbyPage extends React.Component{
 
   componentDidMount(){
     socket.on("StartGame", function(data){
+      console.log(data["players"]);
+      if(data["players"].indexOf(sessionStorage.getItem("currentUser"))==0){
+        your_color = "white";
+      }else{
+        your_color = "black";
+      }
+      console.log(your_color);
       root.render(<Game />);
     });
   }
 
   joinLobby(time){
-    socket.emit("JoinLobby", {TimeControl: time});
+    socket.emit("JoinLobby", {TimeControl: time, username: sessionStorage.getItem("currentUser")});
   }
 
   render(){
