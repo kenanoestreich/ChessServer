@@ -46,14 +46,6 @@ function Square(props) {
   );
 }
 
-function ListItem(props) {
-  return (
-    <button onClick={props.onClick}>
-      {props.value}
-    </button>
-  );
-}
-
 // Board Class 
 // 64 Squares of chess board 
 class Board extends React.Component {
@@ -470,13 +462,63 @@ class Game extends React.Component {
   }
 }
 
-class LoginForm extends React.Component{
+class LobbyPage extends React.Component{
   constructor(props){
-  super(props);
-  this.state = {
-    LoginError: ""
+    super(props);
   }
 
+  componentDidMount(){
+    socket.on("StartGame", function(data){
+      root.render(<Game />);
+    });
+  }
+
+  joinLobby(time){
+    socket.emit("JoinLobby", {TimeControl: time});
+  }
+
+  render(){
+    let wins = this.props.wins;
+    let losses = this.props.losses; 
+    let percentage; 
+    if (losses==0){
+      if (wins>0){
+        percentage = 100 + "%"; 
+      }
+      else{
+        percentage = "No Games Played";
+      }
+    }
+    else {
+      percentage = (wins/losses)*100 + "%";
+    }
+    return (
+      <div>
+        <h1>Welcome {sessionStorage.getItem("currentUser")}!</h1>
+        <span>All Time Wins: {wins}</span>
+        <br></br>
+        <span>All Time Losses: {losses}</span>
+        <br></br>
+        <span>Win Percentage: {percentage}</span>
+        <br></br>
+        <br></br>
+        <h1>Join a Lobby</h1>
+        <span><button id = "1Min" onClick={()=>this.joinLobby(1)}>1 Minute ⁍</button>
+        <button id="5Min" onClick={()=>this.joinLobby(5)}>5 Minute 🗲</button>
+        <button id="10Min" onClick={()=>this.joinLobby(10)}>10 Minute 👤</button>
+        <button id="30Min" onClick={()=>this.joinLobby(30)}>30 Minute 🐢</button>
+        </span>    
+      </div>
+    )
+  }
+}
+
+class LoginForm extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {
+    LoginError: ""
+    }
   }
 
   loggedIn() {
@@ -529,7 +571,16 @@ class LoginForm extends React.Component{
           </div>
       );
     }else{
-      root.render(<Game/>);
+      socket.emit("FetchRecord", {username: sessionStorage.getItem("currentUser")});
+      socket.on("ReceiveRecord", function(data){
+        console.log(JSON.stringify(data));  
+        root.render(
+          <LobbyPage 
+            wins={data["wins"]} 
+            losses={data["losses"]}
+          />
+        );
+      });
     }
   }
 }
@@ -537,7 +588,7 @@ class LoginForm extends React.Component{
 // ========================================
 
 if(loggedIn === true){
-  root.render(<Game />); 
+  root.render(<LobbyPage />); 
 }else{
   root.render(<LoginForm />);
 } 

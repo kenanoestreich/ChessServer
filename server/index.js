@@ -24,7 +24,10 @@ const io = require("socket.io")(http,{
   }
 })
 
-
+let OneMin = [];
+let FiveMin = [];
+let TenMin = [];
+let ThirtyMin = [];
 
 
 /*app.get('/', function(req, res) {
@@ -51,8 +54,6 @@ io.on('connection', function(socket){
 
 
   socket.on('LoginAttempt', function(data){
-    
-
     let newUserInfo; 
     let sql = "SELECT * FROM users WHERE username = ?";
     let username = [
@@ -77,11 +78,6 @@ io.on('connection', function(socket){
   }); 
 
   socket.on("RegisterUser", function(data){
-    /*connection.connect((err)=> {
-      if (err) throw err; 
-      console.log('Connected to Chess Database for Register'); 
-    });*/
-
     let count; 
     let search = "SELECT username FROM users WHERE username = " + mysql.escape(data["username"]);
     connection.query(search, function(err, result) {
@@ -95,7 +91,7 @@ io.on('connection', function(socket){
         let values = [
           [data["username"], data["password"]]
         ]; 
-        connection.query(sql, [values], function(err, result) {
+        connection.query(sql, [values], function(err) {
           if (err) throw err
           socket.emit("LoginSuccess"); 
         });
@@ -105,7 +101,61 @@ io.on('connection', function(socket){
       }
     });
   });
+
+
+  
+
+  
+  socket.on("JoinLobby", function(data) {
+    let gametime = data["TimeControl"];
+    if(gametime == 1){
+      getopponent(OneMin);
+    }else if(gametime == 5){
+      getopponent(FiveMin);
+    }else if(gametime == 10){
+      getopponent(TenMin);
+    }else if(gametime == 30){
+      getopponent(ThirtyMin);
+    }
+  });
+
+  function getopponent(lobby){
+    if(lobby[0]!=null){
+      let opponent_id = lobby[0];
+      let index = lobby.indexOf(opponent_id);
+      lobby.splice(index,1);
+      socket.join(opponent_id+socket.id); 
+      let opponent_socket = io.of('/').sockets.get(opponent_id);
+      opponent_socket.join(opponent_id+socket.id);
+      io.to(opponent_id+socket.id).emit("StartGame", {roomname: opponent_id+socket.id}); 
+      console.log("New Game Name " + opponent_id+socket.id);
+    }else{
+      lobby.push(socket.id);
+      console.log("First Join Lobby: " + lobby);
+    }
+  }
+
+  socket.on("StartGame", function(data){
+    io.in(data["roomname"]).emit("RenderGame"); 
+  })
+
+  
+
+  socket.on("FetchRecord", function(data){
+    let fetch = "SELECT wins, losses FROM users WHERE username = " + mysql.escape(data["username"]);
+    let ans;
+    connection.query(fetch, function(err, result) {
+      if (err) throw err
+      console.log("Wins and Losses: " + JSON.stringify(result)); 
+      console.log("Result: " + result[0].wins); 
+      ans = result;
+      console.log("Ans: " + ans["wins"]); 
+      console.log("Wins Fetched for " + data["username"]); 
+      socket.emit("ReceiveRecord", {wins: result[0].wins, losses: result[0].losses}); 
+    });
+  });
 });
+
 
 // _______________________________________________________________________________
 http.listen(PORT, function(err){
