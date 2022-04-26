@@ -50,11 +50,11 @@ connection.connect((err)=> {
 
 io.on('connection', function(socket){
   connected = true;
-  console.log('A user connected'); 
+  console.log('A client connected'); 
   //Whenever someone disconnects this piece of code executed
   socket.on('disconnect', function(){
      connected = false;
-     console.log('A user disconnected');
+     console.log('A client disconnected');
   });
 
 
@@ -115,13 +115,16 @@ io.on('connection', function(socket){
     let gametime = data["TimeControl"];
     let username = data["username"];
     if(gametime == 1){
-      console.log(`${username} joined game`);
+      console.log(`${username} joined One Min Lobby`);
       getopponent(OneMin,username);
     }else if(gametime == 5){
+      console.log(`${username} joined Five Min Lobby`);
       getopponent(FiveMin,username);
     }else if(gametime == 10){
+      console.log(`${username} joined Ten Min Lobby`);
       getopponent(TenMin,username);
     }else if(gametime == 30){
+      console.log(`${username} joined Thirty Min Lobby`);
       getopponent(ThirtyMin,username);
     }
   });
@@ -135,22 +138,21 @@ io.on('connection', function(socket){
       lobby.splice(index,1);
       socket.join(opponent_name+"_"+player_name); 
       let opponent_socket = io.sockets.sockets.get(opponent_id);
-      console.log("opponent: " + opponent_id);
+      console.log("opponent: " + opponent_name);
       opponent_socket.join(opponent_name+"_"+player_name);
       let players;
-      let choose = Math.random() < 0.5 ? players = [opponent_name,player_name] : players = [player_name, opponent_name];
-      console.log(players);
+      Math.random() < 0.5 ? players = [opponent_name,player_name] : players = [player_name, opponent_name];
+      console.log("Players: " + players);
    //   if(socket.id == opponent_id){
         io.to(opponent_name+"_"+player_name).emit("StartGame", {roomname: opponent_name+"_"+player_name, players: players}); 
         console.log([opponent_name,player_name])
     //  }else{
     //    io.to(opponent_id+socket.id).emit("StartGame", {roomname: opponent_id+socket.id, color: black});
    //   }
-      console.log("New Game Name " + opponent_name+"_"+player_name);
+      console.log("New Game Name: " + opponent_name+"_"+player_name);
       
     }else{
       lobby.push([socket.id,username]);
-      console.log("First Join Lobby: " + lobby);
     }
   }
 
@@ -162,14 +164,9 @@ io.on('connection', function(socket){
 
   socket.on("FetchRecord", function(data){
     let fetch = "SELECT wins, losses FROM users WHERE username = " + mysql.escape(data["username"]);
-    let ans;
     connection.query(fetch, function(err, result) {
       if (err) throw err
-      console.log("Wins and Losses: " + JSON.stringify(result)); 
-      console.log("Result: " + result[0].wins); 
-      ans = result;
-      console.log("Ans: " + ans["wins"]); 
-      console.log("Wins Fetched for " + data["username"]); 
+      console.log("Wins and Losses: " + JSON.stringify(result));  
       socket.emit("ReceiveRecord", {wins: result[0].wins, losses: result[0].losses}); 
     });
   });
