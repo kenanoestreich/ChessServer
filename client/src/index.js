@@ -627,7 +627,7 @@ class Game extends React.Component {
 
         // generate a new board with the piece moved 
         newSquares = movePiece(i,j,pieceClickedRow,pieceClickedCol,newSquares)
-        let miscSquares;
+        let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
         let opponentColor = (playerColor==="white" || ((playerColor==="both")&&whitesTurn)) ? "black" : "white"; 
         // if the opponent's king is in check, display that on the board
         if (isKingCurrentlyInCheck(opponentColor,newSquares)){ 
@@ -651,80 +651,83 @@ class Game extends React.Component {
         else {
           miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
         }
-        socket.emit("MadeAMove", {startSquare: squareNames[pieceClickedRow][pieceClickedCol], endSquare: squareNames[i][j]});
+        if (playerColor!=="both"){
+          console.log("Player " + playerColor + " played " + movename);
+          socket.emit("MadeAMove", {username: sessionStorage.getItem("currentUser"), startSquare: squareNames[pieceClickedRow][pieceClickedCol], endSquare: squareNames[i][j]});
+        }
+        history.push({squares: newSquares, move: movename});
         this.setState({
           history: history,
           whitesTurn: newTurn,
           stepNumber: newStep,
           miscSquares: miscSquares,
-        }) 
+        })
+        return;
       }
-    }
-        
-
-    // If the game is Drawn By Insufficient Material, don't respond to clicks. 
-    if (document.getElementById("status").innerHTML==="Game Drawn By Insufficient Material"){
-      return;
-    }
-
-    // If the game is Drawn by Stalemate or done by Checkmate, don't respond to clicks. 
-    if (isCheckmate("white",whitesTurn, newSquares)||isStalemate(whitesTurn, newSquares, "white")||(isCheckmate("black",whitesTurn,newSquares)||isStalemate(whitesTurn,newSquares,"black"))){
-      return; 
-    }
-    
-    // All the following sections refer to clicking one of the current player's pieces on their turn. 
-    // The square labels should be updated in this case, but nothing should be moved. 
-
-    let miscSquares = findPieceAndDisplay(i,j,whitesTurn,this.state.color,newSquares); 
-    if (miscSquares!==null){
-      this.setState({
-        miscSquares: miscSquares
-      }); 
-
-      // remember this piece's location in case they take a piece with it. 
-      pieceClickedRow = i; 
-      pieceClickedCol = j; 
-      return; 
-    }
-  
-    // reset possible moves highlights if the square clicked is labeled null
-    else { 
-      if (isKingCurrentlyInCheck("white",newSquares)){
-        let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
-        for (let i=0; i<8; i++){
-          for (let j=0; j<8; j++){
-            if (newSquares[i][j]===whiteKing){
-              miscSquares[i][j]="incheck"
-            }
-          }
-        }
-        this.setState({
-          miscSquares: miscSquares
-        });
+      // If the game is Drawn By Insufficient Material, don't respond to clicks. 
+      if (document.getElementById("status").innerHTML==="Game Drawn By Insufficient Material"){
+        return;
       }
-      else if (isKingCurrentlyInCheck("black",newSquares)){
-        let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
-        for (let i=0; i<8; i++){
-          for (let j=0; j<8; j++){
-            if (newSquares[i][j]===blackKing){
-              miscSquares[i][j]="incheck"
-            }
-          }
-        }
-        this.setState({
-          miscSquares: miscSquares
-        });
-      }
-      else{
-        let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
-        this.setState({
-          miscSquares: miscSquares
-        });
+
+      // If the game is Drawn by Stalemate or done by Checkmate, don't respond to clicks. 
+      if (isCheckmate("white",whitesTurn, newSquares)||isStalemate(whitesTurn, newSquares, "white")||(isCheckmate("black",whitesTurn,newSquares)||isStalemate(whitesTurn,newSquares,"black"))){
+        return; 
       }
       
-      pieceClickedRow = null; 
-      pieceClickedCol = null; 
-      return; 
+      // All the following sections refer to clicking one of the current player's pieces on their turn. 
+      // The square labels should be updated in this case, but nothing should be moved. 
+
+      let miscSquares = findPieceAndDisplay(i,j,whitesTurn,this.state.color,newSquares); 
+      if (miscSquares!==null){
+        this.setState({
+          miscSquares: miscSquares
+        }); 
+
+        // remember this piece's location in case they take a piece with it. 
+        pieceClickedRow = i; 
+        pieceClickedCol = j; 
+        return; 
+      }
+    
+      // reset possible moves highlights if the square clicked is labeled null
+      else { 
+        if (isKingCurrentlyInCheck("white",newSquares)){
+          let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
+          for (let i=0; i<8; i++){
+            for (let j=0; j<8; j++){
+              if (newSquares[i][j]===whiteKing){
+                miscSquares[i][j]="incheck"
+              }
+            }
+          }
+          this.setState({
+            miscSquares: miscSquares
+          });
+        }
+        else if (isKingCurrentlyInCheck("black",newSquares)){
+          let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
+          for (let i=0; i<8; i++){
+            for (let j=0; j<8; j++){
+              if (newSquares[i][j]===blackKing){
+                miscSquares[i][j]="incheck"
+              }
+            }
+          }
+          this.setState({
+            miscSquares: miscSquares
+          });
+        }
+        else{
+          let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
+          this.setState({
+            miscSquares: miscSquares
+          });
+        }
+        
+        pieceClickedRow = null; 
+        pieceClickedCol = null; 
+        return; 
+      }
     }
   }
 

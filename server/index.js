@@ -33,8 +33,8 @@ let OneMin = [];
 let FiveMin = [];
 let TenMin = [];
 let ThirtyMin = [];
-let opponent_id; 
-let opponent_socket;
+let roomPairs = []; //store opponent_ids for each client
+let roomPairsNames = []; // store player usernames; 
 
 
 /*app.get('/', function(req, res) {
@@ -133,24 +133,28 @@ io.on('connection', function(socket){
 
   function getopponent(lobby,username){
     if(lobby[0]!=null){
-      opponent_id = lobby[0][0];
+      let opponent_id = lobby[0][0];
       let opponent_name = lobby[0][1];
       let player_name = username;
       let index = lobby.indexOf(opponent_id);
       lobby.splice(index,1);
       socket.join(opponent_name+"_"+player_name); 
-      opponent_socket = io.sockets.sockets.get(opponent_id);
+      let opponent_socket = io.sockets.sockets.get(opponent_id);
       console.log("opponent: " + opponent_name);
       opponent_socket.join(opponent_name+"_"+player_name);
       let players;
       Math.random() < 0.5 ? players = [opponent_name,player_name] : players = [player_name, opponent_name];
+      let newRoom = (players === [opponent_name,player_name]) ? [opponent_id,socket.id] : [socket.id,opponent_id]; 
       console.log("Players: " + players);
-   //   if(socket.id == opponent_id){
-        io.to(opponent_name+"_"+player_name).emit("StartGame", {roomname: opponent_name+"_"+player_name, players: players}); 
-        console.log([opponent_name,player_name])
-    //  }else{
-    //    io.to(opponent_id+socket.id).emit("StartGame", {roomname: opponent_id+socket.id, color: black});
-   //   }
+      roomPairs.push(newRoom); 
+      console.log(roomPairs); 
+      roomPairsNames.push(players); 
+  //   if(socket.id == opponent_id){
+      io.to(opponent_name+"_"+player_name).emit("StartGame", {roomname: opponent_name+"_"+player_name, players: players}); 
+      console.log([opponent_name,player_name])
+  //  }else{
+  //    io.to(opponent_id+socket.id).emit("StartGame", {roomname: opponent_id+socket.id, color: black});
+  //   }
       console.log("New Game Name: " + opponent_name+"_"+player_name);
       
     }else{
@@ -158,12 +162,19 @@ io.on('connection', function(socket){
     }
   }
 
-  socket.on("StartGame", function(data){
-    io.in(data["roomname"]).emit("RenderGame"); 
-  })
-
   socket.on("MadeAMove", function(data){
-    io.to(opponent_id).emit("OpponentMoved", {startSquare: data["startSquare"], endSquare: data["endSquare"]});
+    let i=0;
+    while (i<roomPairsNames.length){
+      if (roomPairsNames[i].includes(data["username"])){
+        for (let j=0; j<2; j++){
+          if (roomPairsNames[i][j]!==data["username"]){
+            console.log(roomPairsNames[i][j] + " Received a move!");
+            io.to(roomPairs[i][j]).emit("OpponentMoved", {startSquare: data["startSquare"], endSquare: data["endSquare"]});
+          }
+        }
+      }
+      i++; 
+    }
   })
   
 
