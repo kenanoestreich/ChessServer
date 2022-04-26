@@ -21,6 +21,7 @@ const blackPawn = '♟';
 const whitePieces = [whiteKing,whiteQueen,whiteRook,whiteBishop,whiteKnight,whitePawn];
 const blackPieces = [blackKing,blackQueen,blackRook,blackBishop,blackKnight,blackPawn];
 
+// Client's color for online game
 let your_color;
 
 // array of roots so we don't get a warning for calling createRoot() multiple times on the same element.
@@ -314,7 +315,7 @@ class Game extends React.Component {
             [blackPawn,blackPawn,blackPawn,blackPawn,blackPawn,blackPawn,blackPawn,blackPawn],
             [blackRook,blackKnight,blackBishop,blackKing,blackQueen,blackBishop,blackKnight,blackRook]],
 
-            moves: "Game Start"
+            move: "Game Start"
           }
         ],
         squareNames: [["h1","g1","f1","e1","d1","c1","b1","a1"],
@@ -359,7 +360,143 @@ class Game extends React.Component {
   }
 
   componentDidMount(){
-    // socket.on("OpponentMoved"
+    socket.on("OpponentMoved", (data) => this.opponentMoved(data["startSquare"],data["endSquare"]));
+  }
+
+  // Only used for multiplayer games
+  opponentMoved(startSquare, endSquare){
+    let history=JSON.parse(JSON.stringify(this.state.history)); 
+    let squareNames=JSON.parse(JSON.stringify(this.state.squareNames));
+    let squares=history[history.length-1].squares; 
+    let playerColor=this.state.color; 
+    let newTakenPieces=JSON.parse(JSON.stringify(this.state.takenPieces)); 
+    let endpiece;
+    let startpiece; 
+    let endname;
+    let startname; 
+    let movename; 
+    let endrow; 
+    let endcol;
+    let startrow;
+    let startcol; 
+    for (let i=0; i<8; i++){
+      for (let j=0; j<8; j++){
+        if (squareNames[i][j]===endSquare){
+          endpiece=squares[i][j]; 
+          endname=squareNames[i][j];
+          endrow=i;
+          endcol=j; 
+        }
+        if (squareNames[i][j]===startSquare){
+          startpiece=squares[i][j]; 
+          startname=squareNames[i][j];
+          startrow=i;
+          startcol=j;
+        }
+      }
+    }
+    // a piece was taken
+    if (endpiece!==null){
+      if (playerColor==="white"){
+        newTakenPieces.black.push(endpiece);
+        this.setState({
+          takenPieces: newTakenPieces
+        })
+      }
+      else if (playerColor==="black"){
+        newTakenPieces.white.push(endpiece);
+        this.setState({
+          takenPieces: newTakenPieces
+        })
+      }
+      // find out which piece was clicked for naming the move
+      if ((startpiece===blackKing)||(startpiece===whiteKing)){
+        movename="Kx"+endname; 
+      }
+      else if ((startpiece===blackBishop)||(startpiece===whiteBishop)){
+        movename="Bx"+endname; 
+      }
+      else if ((startpiece===blackKnight)||(startpiece===whiteKnight)){
+        movename="Nx"+endname; 
+      }
+      else if ((startpiece===blackQueen)||(startpiece===whiteQueen)){
+        movename="Qx"+endname; 
+      }
+      else if ((startpiece===blackRook)||(startpiece===whiteRook)){
+        movename="Rx"+endname; 
+      }
+      else if ((startpiece===blackPawn)||(startpiece===whitePawn)){
+        movename=startname;
+        movename=movename.charAt(0)+"x"+endname; 
+      }
+    }
+    // no piece was taken
+    else {
+      // find out which piece was clicked for naming the move
+      if ((startpiece===blackKing)||(startpiece===whiteKing)){
+        movename="K"+endname;
+      }
+      else if ((startpiece===blackBishop)||(startpiece===whiteBishop)){
+        movename="B"+endname;
+      }
+      else if ((startpiece===blackKnight)||(startpiece===whiteKnight)){
+        movename="N"+endname;
+      }
+      else if ((startpiece===blackQueen)||(startpiece===whiteQueen)){
+        movename="Q"+endname;
+      }
+      else if ((startpiece===blackRook)||(startpiece===whiteRook)){
+        movename="R"+endname;
+      }
+      else if ((startpiece===blackPawn)||(startpiece===whitePawn)){
+        movename=endname;
+      }
+    }
+    // generate a new board with the piece moved 
+    let newSquares = movePiece(endrow,endcol,startrow,startcol,squares)
+
+    // if our king is in check, display that on the board
+    if (isKingCurrentlyInCheck(playerColor,newSquares)){ 
+      
+      movename=movename+"+";
+      // add the new board state to history
+      history.push({squares: newSquares, move: movename});
+
+      // reset square color labels
+      let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null))
+
+      for (let i=0; i<8; i++){
+        for (let j=0; j<8; j++){
+          if (((playerColor==="white") && newSquares[i][j]===whiteKing) ||
+              ((playerColor==="black") && newSquares[i][j]===blackKing)){
+            miscSquares[i][j]="incheck";
+          }
+        }
+      }
+      let newTurn = !this.state.whitesTurn;
+      let newStep = this.state.stepNumber+1;
+      this.setState({
+        history: history,
+        whitesTurn: newTurn,
+        stepNumber: newStep,
+        miscSquares: miscSquares,
+      }); 
+    }
+    else {
+      // add the new board state to history
+      history.push({squares: newSquares, move: movename});
+
+      // reset square color labels
+      let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+      let newTurn=!this.state.whitesTurn; 
+      let newStep=this.state.stepNumber+1;
+      this.setState({
+        history: history,
+        whitesTurn: newTurn,
+        stepNumber: newStep,
+        miscSquares: miscSquares,
+      }) 
+    }
   }
 
   // Function to respond to clicking a square element
@@ -375,7 +512,9 @@ class Game extends React.Component {
     let newTakenPieces = JSON.parse(JSON.stringify(this.state.takenPieces)); 
     let whitesTurn = this.state.whitesTurn; 
     let playerColor = this.state.color; 
+    let squareNames = JSON.parse(JSON.stringify(this.state.squareNames)); 
     console.log(name); 
+    let movename; 
 
     // If not at the most recent move, move to the most recent move
     if (this.state.stepNumber!==history.length-1){
@@ -440,8 +579,7 @@ class Game extends React.Component {
             })
           }
         }
-
-        let movename; 
+ 
         if (newMiscSquares[i][j]==="threatened"){
           // find out which piece was clicked for naming the move
           if ((newSquares[pieceClickedRow][pieceClickedCol]===blackKing)||(newSquares[pieceClickedRow][pieceClickedCol]===whiteKing)){
@@ -489,7 +627,7 @@ class Game extends React.Component {
 
         // generate a new board with the piece moved 
         newSquares = movePiece(i,j,pieceClickedRow,pieceClickedCol,newSquares)
-
+        let miscSquares;
         let opponentColor = (playerColor==="white" || ((playerColor==="both")&&whitesTurn)) ? "black" : "white"; 
         // if the opponent's king is in check, display that on the board
         if (isKingCurrentlyInCheck(opponentColor,newSquares)){ 
@@ -499,7 +637,7 @@ class Game extends React.Component {
           history.push({squares: newSquares, move: movename});
 
           // reset square color labels
-          let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null))
+          miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null))
 
           for (let i=0; i<8; i++){
             for (let j=0; j<8; j++){
@@ -509,92 +647,83 @@ class Game extends React.Component {
               }
             }
           }
-
-          this.setState({
-            history: history,
-            whitesTurn: newTurn,
-            stepNumber: newStep,
-            miscSquares: miscSquares,
-          }) 
         }
         else {
-          history.push({squares: newSquares, move: movename});
-          this.setState({
-            history: history,
-            whitesTurn: newTurn,
-            stepNumber: newStep,
-            miscSquares: Array(8).fill(null).map(()=>Array(8).fill(null))
-          }) 
+          miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
         }
-        return; 
-      }
-
-      // If the game is Drawn By Insufficient Material, don't respond to clicks. 
-      if (document.getElementById("status").innerHTML==="Game Drawn By Insufficient Material"){
-        return;
-      }
-
-      // If the game is Drawn by Stalemate or done by Checkmate, don't respond to clicks. 
-      if (isCheckmate("white",whitesTurn, newSquares)||isStalemate(whitesTurn, newSquares, "white")||(isCheckmate("black",whitesTurn,newSquares)||isStalemate(whitesTurn,newSquares,"black"))){
-        return; 
-      }
-      
-      // All the following sections refer to clicking one of the current player's pieces on their turn. 
-      // The square labels should be updated in this case, but nothing should be moved. 
-
-      let miscSquares = findPieceAndDisplay(i,j,whitesTurn,this.state.color,newSquares); 
-      if (miscSquares!==null){
+        socket.emit("MadeAMove", {startSquare: squareNames[pieceClickedRow][pieceClickedCol], endSquare: squareNames[i][j]});
         this.setState({
-          miscSquares: miscSquares
-        }); 
-
-        // remember this piece's location in case they take a piece with it. 
-        pieceClickedRow = i; 
-        pieceClickedCol = j; 
-        return; 
-      }
-    
-      // reset possible moves highlights if the square clicked is labeled null
-      else { 
-        if (isKingCurrentlyInCheck("white",newSquares)){
-          let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
-          for (let i=0; i<8; i++){
-            for (let j=0; j<8; j++){
-              if (newSquares[i][j]===whiteKing){
-                miscSquares[i][j]="incheck"
-              }
-            }
-          }
-          this.setState({
-            miscSquares: miscSquares
-          });
-        }
-        else if (isKingCurrentlyInCheck("black",newSquares)){
-          let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
-          for (let i=0; i<8; i++){
-            for (let j=0; j<8; j++){
-              if (newSquares[i][j]===blackKing){
-                miscSquares[i][j]="incheck"
-              }
-            }
-          }
-          this.setState({
-            miscSquares: miscSquares
-          });
-        }
-        else{
-          let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
-          this.setState({
-            miscSquares: miscSquares
-          });
-        }
-        
-        pieceClickedRow = null; 
-        pieceClickedCol = null; 
-        return; 
+          history: history,
+          whitesTurn: newTurn,
+          stepNumber: newStep,
+          miscSquares: miscSquares,
+        }) 
       }
     }
-    else {
+        
+
+    // If the game is Drawn By Insufficient Material, don't respond to clicks. 
+    if (document.getElementById("status").innerHTML==="Game Drawn By Insufficient Material"){
+      return;
+    }
+
+    // If the game is Drawn by Stalemate or done by Checkmate, don't respond to clicks. 
+    if (isCheckmate("white",whitesTurn, newSquares)||isStalemate(whitesTurn, newSquares, "white")||(isCheckmate("black",whitesTurn,newSquares)||isStalemate(whitesTurn,newSquares,"black"))){
+      return; 
+    }
+    
+    // All the following sections refer to clicking one of the current player's pieces on their turn. 
+    // The square labels should be updated in this case, but nothing should be moved. 
+
+    let miscSquares = findPieceAndDisplay(i,j,whitesTurn,this.state.color,newSquares); 
+    if (miscSquares!==null){
+      this.setState({
+        miscSquares: miscSquares
+      }); 
+
+      // remember this piece's location in case they take a piece with it. 
+      pieceClickedRow = i; 
+      pieceClickedCol = j; 
+      return; 
+    }
+  
+    // reset possible moves highlights if the square clicked is labeled null
+    else { 
+      if (isKingCurrentlyInCheck("white",newSquares)){
+        let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
+        for (let i=0; i<8; i++){
+          for (let j=0; j<8; j++){
+            if (newSquares[i][j]===whiteKing){
+              miscSquares[i][j]="incheck"
+            }
+          }
+        }
+        this.setState({
+          miscSquares: miscSquares
+        });
+      }
+      else if (isKingCurrentlyInCheck("black",newSquares)){
+        let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
+        for (let i=0; i<8; i++){
+          for (let j=0; j<8; j++){
+            if (newSquares[i][j]===blackKing){
+              miscSquares[i][j]="incheck"
+            }
+          }
+        }
+        this.setState({
+          miscSquares: miscSquares
+        });
+      }
+      else{
+        let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
+        this.setState({
+          miscSquares: miscSquares
+        });
+      }
+      
+      pieceClickedRow = null; 
+      pieceClickedCol = null; 
       return; 
     }
   }
@@ -739,6 +868,7 @@ class LobbyPage extends React.Component{
 
   componentDidMount(){
     socket.on("StartGame", function(data){
+      console.log("Joined Room: " + data["roomname"]);
       console.log(data["players"]);
       if(data["players"].indexOf(sessionStorage.getItem("currentUser"))===0){
         your_color = "white";

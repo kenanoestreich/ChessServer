@@ -33,6 +33,8 @@ let OneMin = [];
 let FiveMin = [];
 let TenMin = [];
 let ThirtyMin = [];
+let opponent_id; 
+let opponent_socket;
 
 
 /*app.get('/', function(req, res) {
@@ -131,13 +133,13 @@ io.on('connection', function(socket){
 
   function getopponent(lobby,username){
     if(lobby[0]!=null){
-      let opponent_id = lobby[0][0];
+      opponent_id = lobby[0][0];
       let opponent_name = lobby[0][1];
       let player_name = username;
       let index = lobby.indexOf(opponent_id);
       lobby.splice(index,1);
       socket.join(opponent_name+"_"+player_name); 
-      let opponent_socket = io.sockets.sockets.get(opponent_id);
+      opponent_socket = io.sockets.sockets.get(opponent_id);
       console.log("opponent: " + opponent_name);
       opponent_socket.join(opponent_name+"_"+player_name);
       let players;
@@ -160,6 +162,9 @@ io.on('connection', function(socket){
     io.in(data["roomname"]).emit("RenderGame"); 
   })
 
+  socket.on("MadeAMove", function(data){
+    io.to(opponent_id).emit("OpponentMoved", {startSquare: data["startSquare"], endSquare: data["endSquare"]});
+  })
   
 
   socket.on("FetchRecord", function(data){
