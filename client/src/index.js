@@ -566,7 +566,7 @@ class Game extends React.Component {
         // if the piece is taking another piece, we need to update the list of taken pieces
         if (newMiscSquares[i][j]==="threatened"){
           let takenPiece = newSquares[i][j];
-          if (whitesTurn){
+          if (playerColor==="both"){
             newTakenPieces.black.push(takenPiece);
             this.setState({
               takenPieces: newTakenPieces
