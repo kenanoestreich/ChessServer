@@ -33,8 +33,9 @@ let OneMin = [];
 let FiveMin = [];
 let TenMin = [];
 let ThirtyMin = [];
-let roomPairs = []; //store opponent_ids for each client
-let roomPairsNames = []; // store player usernames; 
+let roomPairs = [{}];//store opponent_ids for each client
+let roomPairsNames = [{}]; // store player usernames;
+let numRooms=0;  
 
 
 /*app.get('/', function(req, res) {
@@ -138,24 +139,30 @@ io.on('connection', function(socket){
       let player_name = username;
       let index = lobby.indexOf(opponent_id);
       lobby.splice(index,1);
-      socket.join(opponent_name+"_"+player_name); 
       let opponent_socket = io.sockets.sockets.get(opponent_id);
-      console.log("opponent: " + opponent_name);
-      opponent_socket.join(opponent_name+"_"+player_name);
+      console.log("Opponent's Socket: " + opponent_socket); 
       let players;
-      Math.random() < 0.5 ? players = [opponent_name,player_name] : players = [player_name, opponent_name];
+      (Math.random() < 0.5) ? players = [opponent_name,player_name] : players = [player_name, opponent_name];
       let newRoom = (players === [opponent_name,player_name]) ? [opponent_id,socket.id] : [socket.id,opponent_id]; 
-      console.log("Players: " + players);
-      roomPairs.push(newRoom); 
-      console.log(roomPairs); 
-      roomPairsNames.push(players); 
+      roomPairs[numRooms]={room: newRoom}; 
+      console.log("IDs before insertion into JSON: " + newRoom); 
+      roomPairsNames[numRooms]={room: players};
+      console.log("All Room Pairs " + JSON.stringify(roomPairs)); 
+      console.log("All Room Pair Names" + JSON.stringify(roomPairsNames)); 
+      console.log("IDs of Players: " + roomPairs[numRooms].room); 
+      console.log("Names of Players in Room: " + roomPairsNames[numRooms].room); 
+      numRooms++; 
+      let roomname = (players===[player_name,opponent_name]) ? player_name+"_"+opponent_name : opponent_name+"_"+player_name; 
+      socket.join(roomname);
+      opponent_socket.join(roomname);  
+ 
   //   if(socket.id == opponent_id){
-      io.to(opponent_name+"_"+player_name).emit("StartGame", {roomname: opponent_name+"_"+player_name, players: players}); 
-      console.log([opponent_name,player_name])
+      io.to(roomname).emit("StartGame", {roomname: roomname, players: players}); 
+      console.log("Players: " + players); 
   //  }else{
   //    io.to(opponent_id+socket.id).emit("StartGame", {roomname: opponent_id+socket.id, color: black});
   //   }
-      console.log("New Game Name: " + opponent_name+"_"+player_name);
+      console.log("New Game Name: " + roomname);
       
     }else{
       lobby.push([socket.id,username]);
@@ -163,19 +170,18 @@ io.on('connection', function(socket){
   }
 
   socket.on("MadeAMove", function(data){
-    let i=0;
-    while (i<roomPairsNames.length){
-      if (roomPairsNames[i].includes(data["username"])){
+    for (let i=0; i<roomPairsNames.length; i++){
+      if (roomPairsNames[i].room.includes(data["username"])){
         for (let j=0; j<2; j++){
-          if (roomPairsNames[i][j]!==data["username"]){
-            console.log(roomPairsNames[i][j] + " Received a move!");
-            io.to(roomPairs[i][j]).emit("OpponentMoved", {startSquare: data["startSquare"], endSquare: data["endSquare"]});
+          if (roomPairsNames[i].room[j]!==data["username"]){
+            console.log(roomPairsNames[i].room[j] + " Received a move!");
+            io.to(roomPairs[i].room[j]).emit("OpponentMoved", {startSquare: data["startSquare"], endSquare: data["endSquare"]});
+            break; 
           }
         }
       }
-      i++; 
     }
-  })
+  });
   
 
   socket.on("FetchRecord", function(data){
