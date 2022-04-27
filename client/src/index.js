@@ -2,10 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import io from 'socket.io-client';
-import Timer10 from './Timer_10.js'; 
-import Timer1 from './Timer_1.js';
-import Timer5 from './Timer_5.js';
-import Timer30 from './Timer_30.js';
+import Timer from './Timer.js'
 //FOR RICO: let socket = io("http://ec2-44-202-148-202.compute-1.amazonaws.com:3456/");
 let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
 
@@ -331,7 +328,10 @@ class Game extends React.Component {
         stepNumber: 0,
         whitesTurn: true,
         takenPieces: {black: Array(0), white: Array(0)},
-        color: this.props.color
+        color: this.props.color,
+        myTurn: false, 
+        myTime: this.props.startTime,
+        theirTime: this.props.startTime
       }
     }
     else {
@@ -358,7 +358,10 @@ class Game extends React.Component {
         stepNumber: 0,
         whitesTurn: true,
         takenPieces: {black: Array(0), white: Array(0)},
-        color: this.props.color
+        color: this.props.color,
+        myTurn: true, 
+        myTime: this.props.startTime,
+        theirTime: this.props.startTime
       };
     }
   }
@@ -691,6 +694,8 @@ class Game extends React.Component {
         if (playerColor!=="both"){
           console.log("Player " + playerColor + " played " + movename);
           socket.emit("MadeAMove", {username: sessionStorage.getItem("currentUser"), startSquare: squareNames[pieceClickedRow][pieceClickedCol], endSquare: squareNames[i][j]});
+          document.getElementById("timers").firstChild.switch();
+          document.getElementById("timers").children[1].switch();
         }
         this.setState({
           history: history,
@@ -903,30 +908,63 @@ class Game extends React.Component {
       status = (this.state.whitesTurn ? "White's Turn" : "Black's Turn");
     }
     
-
-    return (
-      <div className="game">
-        <div className="game-board">
-          <Board
-            squares={newSquares}
-            onClick={(i,j,name) => this.handleClick(i,j,name)}
-            miscSquares={newMiscSquares}
-            color={this.state.color}
-          />
+    if (this.state.color!=="both"){
+      return (
+        <div className="game">
+          <div id="timers">
+            Your Time
+            <Timer id="myTimer" time={this.state.myTime} isActive={this.state.myTurn} />
+            Opponent's Time
+            <Timer id="theirTimer" time={this.state.theirTime} isActive={!this.state.myTurn}/>
+          </div>
+          <div className="game-board">
+            <Board
+              squares={newSquares}
+              onClick={(i,j,name) => this.handleClick(i,j,name)}
+              miscSquares={newMiscSquares}
+              color={this.state.color}
+            />
+          </div>
+          <div className="game-info">
+            <div id="login">{sessionStorage.getItem("currentUser")}</div>
+            <div id="status">{status}</div>
+            <div>{finishButton}</div>
+            <br></br>
+            <div>Taken White Pieces: {whiteTakenPieces}</div>
+            <div>Taken Black Pieces: {blackTakenPieces}</div>
+            <br></br>
+            <ol>{moves}</ol>
+  
+          </div>
         </div>
-        <div className="game-info">
-          <div id="login">{sessionStorage.getItem("currentUser")}</div>
-          <div id="status">{status}</div>
-          <div>{finishButton}</div>
-          <br></br>
-          <div>Taken White Pieces: {whiteTakenPieces}</div>
-          <div>Taken Black Pieces: {blackTakenPieces}</div>
-          <br></br>
-          <ol>{moves}</ol>
-
+      );
+    }
+    else {
+      return (
+        <div className="game">
+          <div className="game-board">
+            <Board
+              squares={newSquares}
+              onClick={(i,j,name) => this.handleClick(i,j,name)}
+              miscSquares={newMiscSquares}
+              color={this.state.color}
+            />
+          </div>
+          <div className="game-info">
+            <div id="login">{sessionStorage.getItem("currentUser")}</div>
+            <div id="status">{status}</div>
+            <div>{finishButton}</div>
+            <br></br>
+            <div>Taken White Pieces: {whiteTakenPieces}</div>
+            <div>Taken Black Pieces: {blackTakenPieces}</div>
+            <br></br>
+            <ol>{moves}</ol>
+  
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+    
   }
 }
 
@@ -941,10 +979,13 @@ class LobbyPage extends React.Component{
     socket.on("StartGame", function(data){
       console.log("Joined Room: " + data["roomname"]);
       console.log(data["players"]);
+      let iStart; 
       if(data["players"].indexOf(sessionStorage.getItem("currentUser"))===0){
         your_color = "white";
+        iStart = true;
       }else{
         your_color = "black";
+        iStart = false; 
       }
       console.log(your_color);
       let time = data["time"];
@@ -952,12 +993,8 @@ class LobbyPage extends React.Component{
       if (time===1){
         root.render(
           <div>
-            <h4>Your Time</h4>
-            <Timer1/>
-            <h4>Opponent's Time</h4> 
-            <Timer1/>
             <Game 
-              color={your_color}
+              color={your_color} startTime={time*60}
             />
           </div>
         );
@@ -965,12 +1002,8 @@ class LobbyPage extends React.Component{
       else if (time===5){
         root.render(
           <div>
-            <h4>Your Time</h4>
-            <Timer5/>
-            <h4>Opponent's Time</h4> 
-            <Timer5/>
             <Game 
-              color={your_color}
+              color={your_color} startTime={time*60}
             />
           </div>
         );
@@ -978,12 +1011,8 @@ class LobbyPage extends React.Component{
       else if (time===10){
         root.render(
           <div>
-            <h4>Your Time</h4>
-            <Timer10/>
-            <h4>Opponent's Time</h4> 
-            <Timer10/> 
             <Game 
-              color={your_color}
+              color={your_color} startTime={time*60}
             />
           </div>
         );
@@ -991,12 +1020,8 @@ class LobbyPage extends React.Component{
       else if (time===30){
         root.render(
           <div>
-            <h4>Your Time</h4>
-            <Timer30/>
-            <h4>Opponent's Time</h4> 
-            <Timer30/>
             <Game 
-              color={your_color}
+              color={your_color} startTime={time*60}
             />
           </div>
         );
