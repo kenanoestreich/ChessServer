@@ -6,6 +6,9 @@ import Timer from './Timer.js'
 //FOR RICO: let socket = io("http://ec2-44-202-148-202.compute-1.amazonaws.com:3456/");
 let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
 
+// STARTING POINT FOR ALL THIS CODE WAS THE FOLLOWING TUTORIAL CODE: 
+// https://reactjs.org/tutorial/tutorial.html
+
 // enumerations for unicodes to make code readable
 const whiteKing = '♔'; 
 const whiteQueen = '♕';
