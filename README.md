@@ -31,9 +31,9 @@ Best Practices (5 points)
 
 Creative Portion (15 points)
 
-- Single player mode where one client controls both colors. 
-- Read-only history navigation for both multiplayer and single-player mode with correct move notations. 
-- Displaying legal moves via css backgrounds. 
-- Detecting if games are drawn by insufficient material. 
-- Correctly flip the board for different player colors.
-- Strictly enforcing illegal moves even if a piece could normally move there (i.e. if moving a certain piece to a certain square would put the king in check) 
+- 5 Single player mode where one client controls both colors. 
+- 10 Read-only history navigation for both multiplayer and single-player mode with correct move notations. 
+- 2 Displaying legal moves via css backgrounds. 
+- 2 Detecting if games are drawn by insufficient material. 
+- 5 Correctly flip the board for different player colors.
+- 10 Strictly enforcing illegal moves even if a piece could normally move there (i.e. if moving a certain piece to a certain square would put the king in check) 
