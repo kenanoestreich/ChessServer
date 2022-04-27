@@ -111,9 +111,40 @@ io.on('connection', function(socket){
   });
 
 
-  
+  socket.on("LostGame", function(data) {
+    let count; 
+    let fetch = "SELECT losses FROM users WHERE username = " + mysql.escape(data["username"]); 
+    connection.query(fetch, function(err, result) {
+      if (err) {
+        return console.error(error.message); 
+      }
+      count = result; 
+      count[0].losses++; 
+      console.log("Updated Lost Games for " + data["username"] + ": " + count[0].losses); 
+      let sql = "UPDATE users SET losses = " + mysql.escape(count[0].losses) + " WHERE username = " + mysql.escape(data["username"]);     
+      connection.query(sql, function(err) {
+        if (err) throw err
+      });
+    });
+  });
 
-  
+  socket.on("WonGame", function(data) {
+    let count; 
+    let fetch = "SELECT wins FROM users WHERE username = " + mysql.escape(data["username"]); 
+    connection.query(fetch, function(err, result) {
+      if (err) {
+        return console.error(error.message); 
+      }
+      count = result; 
+      count[0].wins++; 
+      console.log("Updated Won Games for " + data["username"] + ": " + count[0].wins); 
+      let sql = "UPDATE users SET wins = " + mysql.escape(count[0].wins) + " WHERE username = " + mysql.escape(data["username"]);
+      connection.query(sql, function(err) {
+        if (err) throw err
+      });
+    });
+  });
+
   socket.on("JoinLobby", function(data) {
     let gametime = data["TimeControl"];
     let username = data["username"];

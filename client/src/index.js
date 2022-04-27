@@ -367,6 +367,27 @@ class Game extends React.Component {
     socket.on("OpponentMoved", (data) => this.opponentMoved(data["startSquare"],data["endSquare"]));
   }
 
+  finishGame(result){
+    socket.emit(result,{username: sessionStorage.getItem("currentUser")}); // either "WonGame" or "LostGame"
+    setTimeout((function(){
+      socket.emit("FetchRecord", {username: sessionStorage.getItem("currentUser")});
+      socket.on("ReceiveRecord", function(data){
+        console.log(JSON.stringify(data));  
+        root.render(
+          <div>
+            <LobbyPage 
+              wins={data["wins"]} 
+              losses={data["losses"]}
+            />
+            <br></br>
+            <h2>Practice While You Wait</h2> 
+            <Game color="both"/>
+          </div>
+        );
+      });
+    }),300);
+  }
+
   // Only used for multiplayer games
   opponentMoved(startSquare, endSquare){
     let history=JSON.parse(JSON.stringify(this.state.history)); 
@@ -454,7 +475,7 @@ class Game extends React.Component {
     let newSquares = movePiece(endrow,endcol,startrow,startcol,squares)
 
     // if our king is in check, display that on the board
-    if (isKingCurrentlyInCheck(playerColor,newSquares)){ 
+    if (isKingCurrentlyInCheck(playerColor,newSquares,playerColor)){ 
       
       movename=movename+"+";
       // add the new board state to history
@@ -526,7 +547,7 @@ class Game extends React.Component {
       return;
     }
 
-    if (isKingCurrentlyInCheck("white",newSquares)){
+    if (isKingCurrentlyInCheck("white",newSquares,playerColor)){
       let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
       for (let i=0; i<8; i++){
         for (let j=0; j<8; j++){
@@ -539,7 +560,7 @@ class Game extends React.Component {
         miscSquares: miscSquares
       });
     }
-    else if (isKingCurrentlyInCheck("black",newSquares)){
+    else if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
       let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
       for (let i=0; i<8; i++){
         for (let j=0; j<8; j++){
@@ -553,6 +574,18 @@ class Game extends React.Component {
       });
     }
    
+    // If the game is Drawn By Insufficient Material, don't respond to clicks. 
+    if (document.getElementById("status").innerHTML==="Game Drawn By Insufficient Material"){
+      console.log("Drawn By Insufficient Material")
+      return;
+    }
+
+    let pawnColor = (this.state.color !== "both") ? this.state.color : "white"; 
+    // If the game is Drawn by Stalemate or done by Checkmate, don't respond to clicks. 
+    if (isCheckmate("white",newSquares,pawnColor)||isStalemate("white", newSquares,pawnColor)||(isCheckmate("black",newSquares,pawnColor)||isStalemate("black",newSquares,pawnColor))){
+      console.log("Checkmate or Stalemate")
+      return; 
+    }
     
     // if the piece is taking another piece, we need to update the list of taken pieces
     if (newMiscSquares[i][j]==="threatened"){
@@ -576,11 +609,11 @@ class Game extends React.Component {
         (playerColor==="black" && !whitesTurn) || 
         (playerColor==="both")){
       
-      // If the clicked square was highlighted as "threatened" (light red) or "possible" (light yellow),
-      // then we know the last piece we clicked can move there. The square wouldn't be highlighted if it 
-      // resulted in check, or if a blank square has been clicked since.
+        // If the clicked square was highlighted as "threatened" (light red) or "possible" (light yellow),
+        // then we know the last piece we clicked can move there. The square wouldn't be highlighted if it 
+        // resulted in check, or if a blank square has been clicked since.
 
-      // We need to send the move to the socket in this case. 
+        // We need to send the move to the socket in this case. 
       if (newMiscSquares[i][j]==="threatened" || newMiscSquares[i][j]==="possible"){
  
         if (newMiscSquares[i][j]==="threatened"){
@@ -633,7 +666,7 @@ class Game extends React.Component {
         let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
         let opponentColor = (playerColor==="white" || ((playerColor==="both")&&whitesTurn)) ? "black" : "white"; 
         // if the opponent's king is in check, display that on the board
-        if (isKingCurrentlyInCheck(opponentColor,newSquares)){ 
+        if (isKingCurrentlyInCheck(opponentColor,newSquares,playerColor)){ 
           
           movename=movename+"+";
           // add the new board state to history
@@ -665,39 +698,32 @@ class Game extends React.Component {
           stepNumber: newStep,
           miscSquares: miscSquares,
         })
-        return;
-      }
 
-      // If the game is Drawn By Insufficient Material, don't respond to clicks. 
-      if (document.getElementById("status").innerHTML==="Game Drawn By Insufficient Material"){
-        console.log("Drawn By Insufficient Material")
-        return;
-      }
-
-      // If the game is Drawn by Stalemate or done by Checkmate, don't respond to clicks. 
-      if (isCheckmate("white",whitesTurn, newSquares)||isStalemate(whitesTurn, newSquares, "white")||(isCheckmate("black",whitesTurn,newSquares)||isStalemate(whitesTurn,newSquares,"black"))){
-        console.log("Checkmate or Stalemate")
         return; 
+      }
+
+      else if ((blackPieces.includes(newSquares[i][j])&&((playerColor==="black")||(playerColor==="both"&&!whitesTurn)))||
+        (whitePieces.includes(newSquares[i][j])&&((playerColor==="white")||(playerColor==="both"&&whitesTurn)))){
+        // All the following sections refer to clicking one of the current player's pieces on their turn. 
+        // The square labels should be updated in this case, but nothing should be moved. 
+        let tempColor = (this.state.color!=="both") ? this.state.color : "white"; 
+        let miscSquares = findPieceAndDisplay(i,j,whitesTurn,tempColor,newSquares); 
+        if (miscSquares!==null){
+          this.setState({
+            miscSquares: miscSquares
+          }); 
+
+          // remember this piece's location in case they take a piece with it. 
+          pieceClickedRow = i; 
+          pieceClickedCol = j; 
+          return; 
+        }
       }
       
-      // All the following sections refer to clicking one of the current player's pieces on their turn. 
-      // The square labels should be updated in this case, but nothing should be moved. 
-
-      let miscSquares = findPieceAndDisplay(i,j,whitesTurn,this.state.color,newSquares); 
-      if (miscSquares!==null){
-        this.setState({
-          miscSquares: miscSquares
-        }); 
-
-        // remember this piece's location in case they take a piece with it. 
-        pieceClickedRow = i; 
-        pieceClickedCol = j; 
-        return; 
-      }
     
       // reset possible moves highlights if the square clicked is labeled null
-      else { 
-        if (isKingCurrentlyInCheck("white",newSquares)){
+      else if (newSquares[i][j]===null){ 
+        if (isKingCurrentlyInCheck("white",newSquares,playerColor)){
           let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
           for (let i=0; i<8; i++){
             for (let j=0; j<8; j++){
@@ -710,7 +736,7 @@ class Game extends React.Component {
             miscSquares: miscSquares
           });
         }
-        else if (isKingCurrentlyInCheck("black",newSquares)){
+        else if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
           let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
           for (let i=0; i<8; i++){
             for (let j=0; j<8; j++){
@@ -743,9 +769,10 @@ class Game extends React.Component {
     const current = history[step];
     let newSquares = JSON.parse(JSON.stringify(current.squares));
     let color = this.state.color; 
+    let opponentColor = (color!=="both") ? ((this.state.color==="white") ? "black" : "white") : "black"; 
     //check if either king is in check and highlight if so 
     if (step===this.state.history.length-1){
-      if (isKingCurrentlyInCheck(color,newSquares)){
+      if (isKingCurrentlyInCheck(color,newSquares,color)){
         let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
         for (let i=0; i<8; i++){
           for (let j=0; j<8; j++){
@@ -761,8 +788,16 @@ class Game extends React.Component {
           miscSquares: miscSquares
         });
       }
-      else {
+      else if (isKingCurrentlyInCheck(opponentColor,newSquares,color)){
         let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+        for (let i=0; i<8; i++){
+          for (let j=0; j<8; j++){
+            if (((color==="both"||color==="white") && newSquares[i][j]===blackKing) ||
+                ((color==="both"||color==="black") && newSquares[i][j]===whiteKing)){
+              miscSquares[i][j]="incheck"
+            }
+          }
+        }
         this.setState({
           stepNumber: step,
           whitesTurn: (step % 2) === 0,
@@ -833,12 +868,31 @@ class Game extends React.Component {
       }
     }); 
 
-    let status;
-    if (isCheckmate(this.state.color, this.state.whitesTurn,current.squares)){
-      status = (this.state.whitesTurn ? "Black" : "White") + " Won By Checkmate!";
+    let finishButton;  
+    let status; 
+    let myColor = (this.state.color!=="both") ? this.state.color : "white";
+    let opponentColor = (myColor==="white") ? "black" : "white"; 
+    if (isCheckmate(myColor,current.squares,myColor)){
+      status = ((myColor==="white") ? "Black" : "White") + " Won By Checkmate!";
+      finishButton = ["LostGame"].map(()=>{
+        return(
+          <button onClick={()=>this.finishGame("LostGame")}>Return To Lobby</button>
+        );
+      }); 
     }
-    else if (isStalemate(this.state.whitesTurn, current.squares, this.state.color)){
+    else if (isCheckmate(opponentColor, current.squares,myColor)){
+      status = ((myColor==="white") ? "White" : "Black") + " Won By Checkmate!";
+      finishButton = ["WonGame"].map(()=>{
+        return(
+          <button onClick={()=>this.finishGame("WonGame")}>Return To Lobby</button>
+        );
+      }); 
+    }
+    else if (isStalemate(myColor, current.squares,myColor)){
       status = "Game Drawn By Stalemate";
+    }
+    else if (isStalemate(opponentColor, current.squares, myColor)){
+      status = "Game Drawn By Stalemate"; 
     }
     else if (whiteTakenPieces.length>=14 && blackTakenPieces.length>=14){
       if (blackCount===11 && whiteCount===11){
@@ -863,11 +917,13 @@ class Game extends React.Component {
         <div className="game-info">
           <div id="login">{sessionStorage.getItem("currentUser")}</div>
           <div id="status">{status}</div>
+          <div>{finishButton}</div>
           <br></br>
           <div>Taken White Pieces: {whiteTakenPieces}</div>
           <div>Taken Black Pieces: {blackTakenPieces}</div>
           <br></br>
           <ol>{moves}</ol>
+
         </div>
       </div>
     );
@@ -946,8 +1002,8 @@ class LobbyPage extends React.Component{
         );
       }
     });
-  }
 
+  }
   
 
   joinLobby(time){
@@ -971,7 +1027,7 @@ class LobbyPage extends React.Component{
       }
     }
     else {
-      percentage = (wins/losses)*100 + "%";
+      percentage = Math.round((wins/(wins+losses))*100) + "%";
     }
     return (
       <div>
@@ -1106,11 +1162,11 @@ if(sessionStorage.getItem("currentUser") !== null){
 // ALL THE "display______Threats" FUNCTIONS EXIST TO AVOID INFINITE LOOPS. 
 
 // Knights
-function displayKnightMoves(currentPieceRow, currentPieceCol, whitesTurn, squares) {
+function displayKnightMoves(currentPieceRow, currentPieceCol, whitesTurn, squares,playerColor) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
   let newSquares;
   let squares_copy;
-  let playerColor = (whitesTurn) ? "white" : "black"; 
+  let color = (whitesTurn) ? "white" : "black";
   if ((whitesTurn && (squares[currentPieceRow][currentPieceCol]===blackKnight)) 
       || (!whitesTurn && (squares[currentPieceRow][currentPieceCol]===whiteKnight))){
     return miscSquares; 
@@ -1132,7 +1188,7 @@ function displayKnightMoves(currentPieceRow, currentPieceCol, whitesTurn, square
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="threatened";
         squares_copy = JSON.parse(JSON.stringify(squares)); 
         newSquares = movePiece(possibleSquares[i][0],possibleSquares[i][1],currentPieceRow,currentPieceCol,squares_copy)
-        if (isKingCurrentlyInCheck(playerColor,newSquares)){
+        if (isKingCurrentlyInCheck(color,newSquares,playerColor)){
           miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]=null; 
         }
       }
@@ -1143,7 +1199,7 @@ function displayKnightMoves(currentPieceRow, currentPieceCol, whitesTurn, square
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="possible";
         squares_copy = JSON.parse(JSON.stringify(squares)); 
         newSquares = movePiece(possibleSquares[i][0],possibleSquares[i][1],currentPieceRow,currentPieceCol,squares_copy)
-        if (isKingCurrentlyInCheck(playerColor,newSquares)){
+        if (isKingCurrentlyInCheck(color,newSquares,playerColor)){
           miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]=null; 
         }
       }
@@ -1189,20 +1245,20 @@ function displayKnightThreats(currentPieceRow, currentPieceCol, whitesTurn, squa
 }
 
 // Bishops 
-function displayBishopMoves(currentPieceRow, currentPieceCol, whitesTurn, squares) {
+function displayBishopMoves(currentPieceRow, currentPieceCol, whitesTurn, squares, playerColor) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
   if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackBishop) 
       || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteBishop)){
     return miscSquares; 
   }
   // up and left "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,-1,squares,miscSquares,whitesTurn);
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,-1,squares,miscSquares,whitesTurn,playerColor);
   // up and right "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,-1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,-1,squares,miscSquares,whitesTurn,playerColor)
   // down and left "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,+1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,+1,squares,miscSquares,whitesTurn,playerColor)
   // down and right "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,+1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,+1,squares,miscSquares,whitesTurn,playerColor)
   miscSquares[currentPieceRow][currentPieceCol]="selected";
   return miscSquares; 
 }
@@ -1244,14 +1300,14 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         miscSquares[currentPieceRow-1][currentPieceCol]="possible";
         squares_copy = JSON.parse(JSON.stringify(squares)); 
         newSquares = movePiece(currentPieceRow-1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
-        if (isKingCurrentlyInCheck(playerColor,newSquares)){
+        if (isKingCurrentlyInCheck(playerColor,newSquares,playerColor)){
           miscSquares[currentPieceRow-1][currentPieceCol]=null; 
         } 
         if (squares[currentPieceRow-2][currentPieceCol]===null){
           miscSquares[currentPieceRow-2][currentPieceCol]="possible"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-2,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck(playerColor,newSquares)){
+          if (isKingCurrentlyInCheck(playerColor,newSquares,playerColor)){
             miscSquares[currentPieceRow-2][currentPieceCol]=null; 
           }
         }
@@ -1261,7 +1317,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow-1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck(playerColor,newSquares)){
+          if (isKingCurrentlyInCheck(playerColor,newSquares,playerColor)){
             miscSquares[currentPieceRow-1][currentPieceCol-1]=null; 
           }
         }
@@ -1271,7 +1327,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow-1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck(playerColor,newSquares)){
+          if (isKingCurrentlyInCheck(playerColor,newSquares,playerColor)){
             miscSquares[currentPieceRow-1][currentPieceCol+1]=null; 
           }
         }
@@ -1284,14 +1340,14 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         miscSquares[currentPieceRow+1][currentPieceCol]="possible"
         squares_copy = JSON.parse(JSON.stringify(squares)); 
         newSquares = movePiece(currentPieceRow+1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
-        if (isKingCurrentlyInCheck("black",newSquares)){
+        if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
           miscSquares[currentPieceRow+1][currentPieceCol]=null; 
         } 
         if (squares[currentPieceRow+2][currentPieceCol]===null){
           miscSquares[currentPieceRow+2][currentPieceCol]="possible"; 
           let squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+2,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("black",newSquares)){
+          if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
             miscSquares[currentPieceRow+2][currentPieceCol]=null; 
           }
         }
@@ -1301,7 +1357,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow+1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("black",newSquares)){
+          if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
             miscSquares[currentPieceRow+1][currentPieceCol]=null; 
           }
         }
@@ -1311,7 +1367,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow+1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("black",newSquares)){
+          if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
             miscSquares[currentPieceRow+1][currentPieceCol+1]=null; 
           }
         }
@@ -1324,7 +1380,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         miscSquares[currentPieceRow-1][currentPieceCol]="possible"; 
         squares_copy = JSON.parse(JSON.stringify(squares)); 
         newSquares = movePiece(currentPieceRow-1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
-        if (isKingCurrentlyInCheck("white",newSquares)){
+        if (isKingCurrentlyInCheck("white",newSquares,playerColor)){
           miscSquares[currentPieceRow-1][currentPieceCol]=null; 
         }
       }
@@ -1333,7 +1389,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow-1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("white",newSquares)){
+          if (isKingCurrentlyInCheck("white",newSquares,playerColor)){
             miscSquares[currentPieceRow-1][currentPieceCol-1]=null; 
           }
         }
@@ -1343,7 +1399,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow-1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("white",newSquares)){
+          if (isKingCurrentlyInCheck("white",newSquares,playerColor)){
             miscSquares[currentPieceRow-1][currentPieceCol+1]=null; 
           }
         }
@@ -1356,7 +1412,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         miscSquares[currentPieceRow+1][currentPieceCol]="possible"; 
         squares_copy = JSON.parse(JSON.stringify(squares)); 
         newSquares = movePiece(currentPieceRow+1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
-        if (isKingCurrentlyInCheck("black",newSquares)){
+        if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
           miscSquares[currentPieceRow+1][currentPieceCol]=null; 
         }
       }
@@ -1365,7 +1421,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow+1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("black",newSquares)){
+          if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
             miscSquares[currentPieceRow+1][currentPieceCol-1]=null; 
           }
         }
@@ -1375,7 +1431,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow+1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("black",newSquares)){
+          if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
             miscSquares[currentPieceRow+1][currentPieceCol+1]=null; 
           }
         }
@@ -1391,14 +1447,14 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         miscSquares[currentPieceRow-1][currentPieceCol]="possible";
         squares_copy = JSON.parse(JSON.stringify(squares)); 
         newSquares = movePiece(currentPieceRow-1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
-        if (isKingCurrentlyInCheck("black",newSquares)){
+        if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
           miscSquares[currentPieceRow-1][currentPieceCol]=null; 
         } 
         if (squares[currentPieceRow-2][currentPieceCol]===null){
           miscSquares[currentPieceRow-2][currentPieceCol]="possible"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-2,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("black",newSquares)){
+          if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
             miscSquares[currentPieceRow-2][currentPieceCol]=null; 
           }
         }
@@ -1408,7 +1464,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow-1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("black",newSquares)){
+          if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
             miscSquares[currentPieceRow-1][currentPieceCol-1]=null; 
           }
         }
@@ -1418,7 +1474,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow-1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("black",newSquares)){
+          if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
             miscSquares[currentPieceRow-1][currentPieceCol+1]=null; 
           }
         }
@@ -1431,14 +1487,14 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         miscSquares[currentPieceRow+1][currentPieceCol]="possible"
         squares_copy = JSON.parse(JSON.stringify(squares)); 
         newSquares = movePiece(currentPieceRow+1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
-        if (isKingCurrentlyInCheck("white",newSquares)){
+        if (isKingCurrentlyInCheck("white",newSquares,playerColor)){
           miscSquares[currentPieceRow+1][currentPieceCol]=null; 
         } 
         if (squares[currentPieceRow+2][currentPieceCol]===null){
           miscSquares[currentPieceRow+2][currentPieceCol]="possible"; 
           let squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+2,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("white",newSquares)){
+          if (isKingCurrentlyInCheck("white",newSquares,playerColor)){
             miscSquares[currentPieceRow+2][currentPieceCol]=null; 
           }
         }
@@ -1448,7 +1504,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow+1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("white",newSquares)){
+          if (isKingCurrentlyInCheck("white",newSquares,playerColor)){
             miscSquares[currentPieceRow+1][currentPieceCol]=null; 
           }
         }
@@ -1458,7 +1514,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow+1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("white",newSquares)){
+          if (isKingCurrentlyInCheck("white",newSquares,playerColor)){
             miscSquares[currentPieceRow+1][currentPieceCol+1]=null; 
           }
         }
@@ -1471,7 +1527,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         miscSquares[currentPieceRow-1][currentPieceCol]="possible"; 
         squares_copy = JSON.parse(JSON.stringify(squares)); 
         newSquares = movePiece(currentPieceRow-1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
-        if (isKingCurrentlyInCheck("black",newSquares)){
+        if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
           miscSquares[currentPieceRow-1][currentPieceCol]=null; 
         }
       }
@@ -1480,7 +1536,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow-1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("black",newSquares)){
+          if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
             miscSquares[currentPieceRow-1][currentPieceCol-1]=null; 
           }
         }
@@ -1490,7 +1546,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow-1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("black",newSquares)){
+          if (isKingCurrentlyInCheck("black",newSquares,playerColor)){
             miscSquares[currentPieceRow-1][currentPieceCol+1]=null; 
           }
         }
@@ -1503,7 +1559,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         miscSquares[currentPieceRow+1][currentPieceCol]="possible"; 
         squares_copy = JSON.parse(JSON.stringify(squares)); 
         newSquares = movePiece(currentPieceRow+1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
-        if (isKingCurrentlyInCheck("white",newSquares)){
+        if (isKingCurrentlyInCheck("white",newSquares,playerColor)){
           miscSquares[currentPieceRow+1][currentPieceCol]=null; 
         }
       }
@@ -1512,7 +1568,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow+1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("white",newSquares)){
+          if (isKingCurrentlyInCheck("white",newSquares,playerColor)){
             miscSquares[currentPieceRow+1][currentPieceCol-1]=null; 
           }
         }
@@ -1522,7 +1578,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
           miscSquares[currentPieceRow+1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
-          if (isKingCurrentlyInCheck("white",newSquares)){
+          if (isKingCurrentlyInCheck("white",newSquares,playerColor)){
             miscSquares[currentPieceRow+1][currentPieceCol+1]=null; 
           }
         }
@@ -1589,20 +1645,20 @@ function displayPawnThreats(currentPieceRow, currentPieceCol, whitesTurn, player
 }
 
 // Rooks 
-function displayRookMoves(currentPieceRow, currentPieceCol, whitesTurn, squares) {
+function displayRookMoves(currentPieceRow, currentPieceCol, whitesTurn, squares, playerColor) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
   if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackRook) 
       || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteRook)){
     return miscSquares; 
   }
   // up "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,0,-1,squares,miscSquares,whitesTurn);
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,0,-1,squares,miscSquares,whitesTurn,playerColor);
   // down "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,0,+1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,0,+1,squares,miscSquares,whitesTurn,playerColor)
   // left "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,0,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,0,squares,miscSquares,whitesTurn,playerColor)
   // right "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,0,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,0,squares,miscSquares,whitesTurn,playerColor)
   miscSquares[currentPieceRow][currentPieceCol]="selected";
   return miscSquares; 
 }
@@ -1626,28 +1682,28 @@ function displayRookThreats(currentPieceRow, currentPieceCol, whitesTurn, square
 }
 
 // Queens
-function displayQueenMoves(currentPieceRow, currentPieceCol, whitesTurn, squares) {
+function displayQueenMoves(currentPieceRow, currentPieceCol, whitesTurn, squares, playerColor) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
   if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackQueen) 
       || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteQueen)){
     return miscSquares; 
   }
   // up "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,0,-1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,0,-1,squares,miscSquares,whitesTurn,playerColor)
   // down "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,0,+1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,0,+1,squares,miscSquares,whitesTurn,playerColor)
   // left "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,0,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,0,squares,miscSquares,whitesTurn,playerColor)
   // right "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,0,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,0,squares,miscSquares,whitesTurn,playerColor)
   // up and left "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,-1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,-1,squares,miscSquares,whitesTurn,playerColor)
   // up and right "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,-1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,-1,squares,miscSquares,whitesTurn,playerColor)
   // down and left "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,+1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,+1,squares,miscSquares,whitesTurn,playerColor)
   // down and right "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,+1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,+1,squares,miscSquares,whitesTurn,playerColor)
   miscSquares[currentPieceRow][currentPieceCol]="selected";
   return miscSquares; 
 }
@@ -1680,10 +1736,10 @@ function displayQueenThreats(currentPieceRow, currentPieceCol, whitesTurn, squar
 
 // Kings
 // TO DO: NEED TO NOT DISPLAY MOVES THAT WOULD PUT THE KING IN CHECK AND CASTLING
-function displayKingMoves(currentPieceRow, currentPieceCol, whitesTurn, squares) {
+function displayKingMoves(currentPieceRow, currentPieceCol, whitesTurn, squares, playerColor) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
   let newSquares; 
-  let playerColor = (whitesTurn) ? "white" : "black";
+  let color = (whitesTurn) ? "white" : "black"; 
   if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackKing) 
       || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteKing)){
     return miscSquares; 
@@ -1705,7 +1761,7 @@ function displayKingMoves(currentPieceRow, currentPieceCol, whitesTurn, squares)
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="threatened";
         let squares_copy = JSON.parse(JSON.stringify(squares)); 
         newSquares = movePiece(possibleSquares[i][0],possibleSquares[i][1],currentPieceRow,currentPieceCol,squares_copy)
-        if (isKingCurrentlyInCheck(playerColor,newSquares)){
+        if (isKingCurrentlyInCheck(color,newSquares,playerColor)){
           miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]=null; 
         }
       }
@@ -1716,7 +1772,7 @@ function displayKingMoves(currentPieceRow, currentPieceCol, whitesTurn, squares)
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="possible";
         let squares_copy = JSON.parse(JSON.stringify(squares)); 
         newSquares = movePiece(possibleSquares[i][0],possibleSquares[i][1],currentPieceRow,currentPieceCol,squares_copy)
-        if (isKingCurrentlyInCheck(playerColor,newSquares)){
+        if (isKingCurrentlyInCheck(color,newSquares,playerColor)){
           miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]=null; 
         }
       }
@@ -1765,18 +1821,18 @@ function displayKingThreats(currentPieceRow, currentPieceCol, whitesTurn, square
 }
 
 // helper function for bishops, rooks, and queens
-function checkAxis(currentPieceRow, currentPieceCol, rowDelta, colDelta, squares, miscSquares, whitesTurn){
+function checkAxis(currentPieceRow, currentPieceCol, rowDelta, colDelta, squares, miscSquares, whitesTurn, playerColor){
   let i=currentPieceRow+rowDelta;
   let j=currentPieceCol+colDelta; 
   let squares_copy;
   let newSquares;
-  let playerColor = (whitesTurn) ? "white" : "black"; 
+  let color = (whitesTurn) ? "white" : "black"; 
   while (i < 8 && i >=0 && j < 8 && j >=0) {
     if (squares[i][j]===null){
       miscSquares[i][j]="possible"; 
       squares_copy = JSON.parse(JSON.stringify(squares)); 
       newSquares = movePiece(i,j,currentPieceRow,currentPieceCol,squares_copy)
-      if (isKingCurrentlyInCheck(playerColor,newSquares)){
+      if (isKingCurrentlyInCheck(color,newSquares,playerColor)){
         miscSquares[i][j]=null; 
       }
     }
@@ -1789,7 +1845,7 @@ function checkAxis(currentPieceRow, currentPieceCol, rowDelta, colDelta, squares
       miscSquares[i][j]="threatened";
       squares_copy = JSON.parse(JSON.stringify(squares)); 
       newSquares = movePiece(i,j,currentPieceRow,currentPieceCol,squares_copy)
-      if (isKingCurrentlyInCheck(playerColor,newSquares)){
+      if (isKingCurrentlyInCheck(color,newSquares,playerColor)){
         miscSquares[i][j]=null; 
       }
       break; 
@@ -1916,13 +1972,13 @@ function squaresCombiner(pieceThreats, allThreatenedSquares){
 
 // Function to detect if King is CURRENTLY in check. 
 // Will be called recursively after prospective moves to see if the move gets the king out of check. 
-function isKingCurrentlyInCheck(kingColor, squares){
+function isKingCurrentlyInCheck(kingColor, squares, playerColor){
   let allThreatenedSquares; 
   if (kingColor==="white") {
     for (let i=0; i<8; i++){
       for (let j=0; j<8; j++){
         if (squares[i][j]===whiteKing){
-          allThreatenedSquares = checkThreatenedSquares("Black",squares); 
+          allThreatenedSquares = checkThreatenedSquares("Black",squares,playerColor); 
           if (allThreatenedSquares[i][j]==="threatened"){
             return true; 
           }
@@ -1934,7 +1990,7 @@ function isKingCurrentlyInCheck(kingColor, squares){
     for (let i=0; i<8; i++){
       for (let j=0; j<8; j++){
         if (squares[i][j]===blackKing){
-          allThreatenedSquares = checkThreatenedSquares("White",squares); 
+          allThreatenedSquares = checkThreatenedSquares("White",squares,playerColor); 
           if (allThreatenedSquares[i][j]==="threatened"){
             return true; 
           }
@@ -1945,36 +2001,37 @@ function isKingCurrentlyInCheck(kingColor, squares){
   return false; 
 }
 
-function isCheckmate(kingColor, whitesTurn, squares){
+function isCheckmate(kingColor,squares, pawnColor){
   let legalMoves = Array(8).fill(null).map(()=>Array(8).fill(null));
-  let pieceMoves;  
-  if (isKingCurrentlyInCheck(kingColor, squares)){
+  let pieceMoves;   
+  let whitesTurn = (kingColor==="white") ? true : false; 
+  if (isKingCurrentlyInCheck(kingColor, squares,pawnColor)){
     for (let i=0; i<8; i++){
       for (let j=0; j<8; j++){
         if (((kingColor==="both" || kingColor==="white") && whitePieces.includes(squares[i][j])) ||
           ((kingColor==="both" || kingColor==="black") && blackPieces.includes(squares[i][j]))) {
           if (((kingColor==="both" || kingColor==="white") && squares[i][j]===whiteKnight) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===blackKnight)){
-            pieceMoves = displayKnightMoves(i,j,whitesTurn,squares);
+            pieceMoves = displayKnightMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
           if (((kingColor==="both" || kingColor==="white") && squares[i][j]===whitePawn) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===blackPawn)){
-            pieceMoves = displayPawnMoves(i,j,whitesTurn,kingColor,squares);
+            pieceMoves = displayPawnMoves(i,j,whitesTurn,pawnColor,squares);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
           if (((kingColor==="both" || kingColor==="white") && squares[i][j]===whiteBishop) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===blackBishop)){
-            pieceMoves = displayBishopMoves(i,j,whitesTurn,squares);
+            pieceMoves = displayBishopMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
           if (((kingColor==="both" || kingColor==="white") && squares[i][j]===whiteQueen) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===blackQueen)){
-            pieceMoves = displayQueenMoves(i,j,whitesTurn,squares);
+            pieceMoves = displayQueenMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
           if (((kingColor==="both" || kingColor==="white") && squares[i][j]===whiteKing) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===blackKing)){
-            pieceMoves = displayKingMoves(i,j,whitesTurn,squares);
+            pieceMoves = displayKingMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
           if (((kingColor==="both" || kingColor==="white") && squares[i][j]===whiteRook) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===blackRook)){
-            pieceMoves = displayRookMoves(i,j,whitesTurn,squares);
+            pieceMoves = displayRookMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
 
@@ -1993,36 +2050,37 @@ function isCheckmate(kingColor, whitesTurn, squares){
   }
 }
 
-function isStalemate(whitesTurn, squares, playerColor){
+function isStalemate(kingColor, squares, pawnColor){
   let legalMoves = Array(8).fill(null).map(()=>Array(8).fill(null));
   let pieceMoves; 
-  if (!isKingCurrentlyInCheck(whitesTurn, squares)){
+  let whitesTurn = (kingColor==="white") ? true : false; 
+  if (!isKingCurrentlyInCheck(kingColor, squares, pawnColor)){
     for (let i=0; i<8; i++){
       for (let j=0; j<8; j++){
         if ((whitesTurn && whitePieces.includes(squares[i][j])) ||
           (!whitesTurn && blackPieces.includes(squares[i][j]))) {
           if ((whitesTurn && squares[i][j]===whiteKnight) || (!whitesTurn && squares[i][j]===blackKnight)){
-            pieceMoves = displayKnightMoves(i,j,whitesTurn,squares);
+            pieceMoves = displayKnightMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
           if ((whitesTurn && squares[i][j]===whitePawn) || (!whitesTurn && squares[i][j]===blackPawn)){
-            pieceMoves = displayPawnMoves(i,j,whitesTurn,playerColor,squares);
+            pieceMoves = displayPawnMoves(i,j,whitesTurn,pawnColor,squares);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
           if ((whitesTurn && squares[i][j]===whiteBishop) || (!whitesTurn && squares[i][j]===blackBishop)){
-            pieceMoves = displayBishopMoves(i,j,whitesTurn,squares);
+            pieceMoves = displayBishopMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
           if ((whitesTurn && squares[i][j]===whiteQueen) || (!whitesTurn && squares[i][j]===blackQueen)){
-            pieceMoves = displayQueenMoves(i,j,whitesTurn,squares);
+            pieceMoves = displayQueenMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
           if ((whitesTurn && squares[i][j]===whiteKing) || (!whitesTurn && squares[i][j]===blackKing)){
-            pieceMoves = displayKingMoves(i,j,whitesTurn,squares);
+            pieceMoves = displayKingMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
           if ((whitesTurn && squares[i][j]===whiteRook) || (!whitesTurn && squares[i][j]===blackRook)){
-            pieceMoves = displayRookMoves(i,j,whitesTurn,squares);
+            pieceMoves = displayRookMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
         }
@@ -2046,22 +2104,22 @@ function isStalemate(whitesTurn, squares, playerColor){
 function findPieceAndDisplay(pieceRow, pieceCol, whitesTurn, playerColor, squares) {
   for (let i=0; i<6; i++){
     if (squares[pieceRow][pieceCol]===whitePieces[i] || squares[pieceRow][pieceCol]===blackPieces[i]) {
-      if (isKingCurrentlyInCheck("white",squares)){
+      if (isKingCurrentlyInCheck("white",squares, playerColor)){
         let miscSquares;
         if (i===0){
-          miscSquares = displayKingMoves(pieceRow,pieceCol,whitesTurn,squares); 
+          miscSquares = displayKingMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor); 
         }
         if (i===1){
-          miscSquares = displayQueenMoves(pieceRow,pieceCol,whitesTurn,squares); 
+          miscSquares = displayQueenMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor); 
         }
         if (i===2){
-          miscSquares = displayRookMoves(pieceRow,pieceCol,whitesTurn,squares); 
+          miscSquares = displayRookMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor); 
         }
         if (i===3){
-          miscSquares = displayBishopMoves(pieceRow,pieceCol,whitesTurn,squares); 
+          miscSquares = displayBishopMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor); 
         }
         if (i===4){
-          miscSquares = displayKnightMoves(pieceRow,pieceCol,whitesTurn,squares); 
+          miscSquares = displayKnightMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor); 
         }
         if (i===5){
           miscSquares = displayPawnMoves(pieceRow,pieceCol,whitesTurn,playerColor,squares); 
@@ -2076,22 +2134,22 @@ function findPieceAndDisplay(pieceRow, pieceCol, whitesTurn, playerColor, square
         }
         return miscSquares; 
       }
-      else if (isKingCurrentlyInCheck("black",squares)){
+      else if (isKingCurrentlyInCheck("black",squares,playerColor)){
         let miscSquares;
         if (i===0){
-          miscSquares = displayKingMoves(pieceRow,pieceCol,whitesTurn,squares); 
+          miscSquares = displayKingMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor); 
         }
         if (i===1){
-          miscSquares = displayQueenMoves(pieceRow,pieceCol,whitesTurn,squares); 
+          miscSquares = displayQueenMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor); 
         }
         if (i===2){
-          miscSquares = displayRookMoves(pieceRow,pieceCol,whitesTurn,squares); 
+          miscSquares = displayRookMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor); 
         }
         if (i===3){
-          miscSquares = displayBishopMoves(pieceRow,pieceCol,whitesTurn,squares); 
+          miscSquares = displayBishopMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor); 
         }
         if (i===4){
-          miscSquares = displayKnightMoves(pieceRow,pieceCol,whitesTurn,squares); 
+          miscSquares = displayKnightMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor); 
         }
         if (i===5){
           miscSquares = displayPawnMoves(pieceRow,pieceCol,whitesTurn,playerColor,squares); 
@@ -2108,19 +2166,19 @@ function findPieceAndDisplay(pieceRow, pieceCol, whitesTurn, playerColor, square
       }
       else {
         if (i===0){
-          return displayKingMoves(pieceRow,pieceCol,whitesTurn,squares);
+          return displayKingMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor);
         }
         if (i===1){
-          return displayQueenMoves(pieceRow,pieceCol,whitesTurn,squares);
+          return displayQueenMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor);
         }
         if (i===2){
-          return displayRookMoves(pieceRow,pieceCol,whitesTurn,squares);
+          return displayRookMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor);
         }
         if (i===3){
-          return displayBishopMoves(pieceRow,pieceCol,whitesTurn,squares);
+          return displayBishopMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor);
         }
         if (i===4){
-          return displayKnightMoves(pieceRow,pieceCol,whitesTurn,squares);
+          return displayKnightMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor);
         }
         if (i===5){
           return displayPawnMoves(pieceRow,pieceCol,whitesTurn,playerColor,squares);
