@@ -3,7 +3,7 @@ Rico Coleman, 475313, RicoC-WU
 (Approved by TA JJ WEI 04/11/2022)
 Kenan Oestreich, 456424, kenanoestreich
 
-Description: We will create an online chess game using React.JS, socket.io, Javascript, PHP, and MySQL
+Description: We will create an online chess game using React.JS, socket.io, Javascript, node.JS and MySQL
 
 Rubric - 
 
