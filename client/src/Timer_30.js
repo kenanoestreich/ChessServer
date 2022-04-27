@@ -19,7 +19,7 @@ function Timer_30() {
   return (
     <div className="app">
       <div className="time">
-        {Math.floor(seconds/60)}:{seconds%60}
+        {Math.floor(seconds/60)}m{seconds%60}s
       </div>
       <div className="row">
       </div>

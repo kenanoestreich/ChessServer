@@ -2,10 +2,10 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import io from 'socket.io-client';
-import Timer_10 from './Timer_10.js'; 
-import Timer_1 from './Timer_1.js';
-import Timer_5 from './Timer_5.js';
-import Timer_30 from './Timer_30.js';
+import Timer10 from './Timer_10.js'; 
+import Timer1 from './Timer_1.js';
+import Timer5 from './Timer_5.js';
+import Timer30 from './Timer_30.js';
 //FOR RICO: let socket = io("http://ec2-44-202-148-202.compute-1.amazonaws.com:3456/");
 let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
 
@@ -371,7 +371,7 @@ class Game extends React.Component {
   opponentMoved(startSquare, endSquare){
     let history=JSON.parse(JSON.stringify(this.state.history)); 
     let squareNames=JSON.parse(JSON.stringify(this.state.squareNames));
-    let squares=history[history.length-1].squares; 
+    let squares=JSON.parse(JSON.stringify(history[history.length-1].squares)); 
     let playerColor=this.state.color; 
     let newTakenPieces=JSON.parse(JSON.stringify(this.state.takenPieces)); 
     let endpiece;
@@ -401,17 +401,11 @@ class Game extends React.Component {
     }
     // a piece was taken
     if (endpiece!==null){
-      if (playerColor==="white"){
+      if (blackPieces.includes(endpiece)){
         newTakenPieces.black.push(endpiece);
-        this.setState({
-          takenPieces: newTakenPieces
-        })
       }
-      else if (playerColor==="black"){
+      else if (whitePieces.includes(endpiece)){
         newTakenPieces.white.push(endpiece);
-        this.setState({
-          takenPieces: newTakenPieces
-        })
       }
       // find out which piece was clicked for naming the move
       if ((startpiece===blackKing)||(startpiece===whiteKing)){
@@ -478,13 +472,16 @@ class Game extends React.Component {
         }
       }
       let newTurn = !this.state.whitesTurn;
-      let newStep = this.state.stepNumber+1;
+      let newStep = this.state.stepNumber;
+      newStep++;
       this.setState({
         history: history,
         whitesTurn: newTurn,
         stepNumber: newStep,
         miscSquares: miscSquares,
+        takenPieces: newTakenPieces
       }); 
+      return; 
     }
     else {
       // add the new board state to history
@@ -493,13 +490,16 @@ class Game extends React.Component {
       // reset square color labels
       let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
       let newTurn=!this.state.whitesTurn; 
-      let newStep=this.state.stepNumber+1;
+      let newStep=this.state.stepNumber;
+      newStep++;
       this.setState({
         history: history,
         whitesTurn: newTurn,
         stepNumber: newStep,
         miscSquares: miscSquares,
+        takenPieces: newTakenPieces
       }) 
+      return; 
     }
   }
 
@@ -554,6 +554,22 @@ class Game extends React.Component {
     }
    
     
+    // if the piece is taking another piece, we need to update the list of taken pieces
+    if (newMiscSquares[i][j]==="threatened"){
+      let takenPiece = newSquares[i][j];
+      if (playerColor==="white"){
+        newTakenPieces.black.push(takenPiece);
+        this.setState({
+          takenPieces: newTakenPieces
+        })
+      }
+      else if (playerColor==="black"){
+        newTakenPieces.white.push(takenPiece);
+        this.setState({
+          takenPieces: newTakenPieces
+        })
+      }
+    }
 
     // Everything below here should only occur if it's the current player's turn (or single player):
     if ((playerColor==="white" && whitesTurn) ||
@@ -566,23 +582,6 @@ class Game extends React.Component {
 
       // We need to send the move to the socket in this case. 
       if (newMiscSquares[i][j]==="threatened" || newMiscSquares[i][j]==="possible"){
-
-        // if the piece is taking another piece, we need to update the list of taken pieces
-        if (newMiscSquares[i][j]==="threatened"){
-          let takenPiece = newSquares[i][j];
-          if (playerColor==="both"){
-            newTakenPieces.black.push(takenPiece);
-            this.setState({
-              takenPieces: newTakenPieces
-            })
-          }
-          else{
-            newTakenPieces.white.push(takenPiece);
-            this.setState({
-              takenPieces: newTakenPieces
-            })
-          }
-        }
  
         if (newMiscSquares[i][j]==="threatened"){
           // find out which piece was clicked for naming the move
@@ -668,6 +667,7 @@ class Game extends React.Component {
         })
         return;
       }
+
       // If the game is Drawn By Insufficient Material, don't respond to clicks. 
       if (document.getElementById("status").innerHTML==="Game Drawn By Insufficient Material"){
         console.log("Drawn By Insufficient Material")
@@ -816,6 +816,7 @@ class Game extends React.Component {
       }
     });
 
+
     let blackTakenPieces=this.state.takenPieces.black;
     let whiteTakenPieces=this.state.takenPieces.white;
     // define counts for insufficient material check
@@ -833,7 +834,7 @@ class Game extends React.Component {
     }); 
 
     let status;
-    if (isCheckmate(this.state.whitesTurn,current.squares)){
+    if (isCheckmate(this.state.color, this.state.whitesTurn,current.squares)){
       status = (this.state.whitesTurn ? "Black" : "White") + " Won By Checkmate!";
     }
     else if (isStalemate(this.state.whitesTurn, current.squares, this.state.color)){
@@ -874,7 +875,12 @@ class Game extends React.Component {
 }
 
 class LobbyPage extends React.Component{
-
+  constructor(props){
+    super(props)
+    this.state = {
+      status : null,
+    }
+  }
   componentDidMount(){
     socket.on("StartGame", function(data){
       console.log("Joined Room: " + data["roomname"]);
@@ -885,15 +891,60 @@ class LobbyPage extends React.Component{
         your_color = "black";
       }
       console.log(your_color);
-      root.render(
-      <div>
-        <span>Your Time<Timer_1/>Opponent's Time<Timer_1/></span> 
-        <Game 
-          color={your_color}
-        />
-
-      </div>
-      );
+      let time = data["time"];
+      console.log("Time Control: " + data["time"]);  
+      if (time===1){
+        root.render(
+          <div>
+            <h4>Your Time</h4>
+            <Timer1/>
+            <h4>Opponent's Time</h4> 
+            <Timer1/>
+            <Game 
+              color={your_color}
+            />
+          </div>
+        );
+      }
+      else if (time===5){
+        root.render(
+          <div>
+            <h4>Your Time</h4>
+            <Timer5/>
+            <h4>Opponent's Time</h4> 
+            <Timer5/>
+            <Game 
+              color={your_color}
+            />
+          </div>
+        );
+      }
+      else if (time===10){
+        root.render(
+          <div>
+            <h4>Your Time</h4>
+            <Timer10/>
+            <h4>Opponent's Time</h4> 
+            <Timer10/> 
+            <Game 
+              color={your_color}
+            />
+          </div>
+        );
+      }
+      else if (time===30){
+        root.render(
+          <div>
+            <h4>Your Time</h4>
+            <Timer30/>
+            <h4>Opponent's Time</h4> 
+            <Timer30/>
+            <Game 
+              color={your_color}
+            />
+          </div>
+        );
+      }
     });
   }
 
@@ -901,12 +952,16 @@ class LobbyPage extends React.Component{
 
   joinLobby(time){
     socket.emit("JoinLobby", {TimeControl: time, username: sessionStorage.getItem("currentUser")});
+    this.setState({
+      status : "Waiting..."
+    })
   }
 
   render(){
     let wins = this.props.wins;
     let losses = this.props.losses; 
     let percentage; 
+    let status = this.state.status; 
     if (losses===0){
       if (wins>0){
         percentage = 100 + "%"; 
@@ -933,7 +988,8 @@ class LobbyPage extends React.Component{
         <button id="5Min" onClick={()=>this.joinLobby(5)}>5 Minute 🗲</button>
         <button id="10Min" onClick={()=>this.joinLobby(10)}>10 Minute 👤</button>
         <button id="30Min" onClick={()=>this.joinLobby(30)}>30 Minute 🐢</button>
-        </span>  
+        </span>
+        <h3>{status}</h3>  
       </div>
     )
   }

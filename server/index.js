@@ -140,29 +140,25 @@ io.on('connection', function(socket){
       let index = lobby.indexOf(opponent_id);
       lobby.splice(index,1);
       let opponent_socket = io.sockets.sockets.get(opponent_id);
-      console.log("Opponent's Socket: " + opponent_socket); 
+      console.log("First Joined's Name: " + opponent_name + " First Joined's Socket Id: " + opponent_id); 
       let players;
       (Math.random() < 0.5) ? players = [opponent_name,player_name] : players = [player_name, opponent_name];
-      let newRoom = (players === [opponent_name,player_name]) ? [opponent_id,socket.id] : [socket.id,opponent_id]; 
+      let newRoom;
+      (players[0]===opponent_name) ? newRoom = [opponent_id,socket.id] : newRoom = [socket.id,opponent_id];
       roomPairs[numRooms]={room: newRoom}; 
-      console.log("IDs before insertion into JSON: " + newRoom); 
       roomPairsNames[numRooms]={room: players};
-      console.log("All Room Pairs " + JSON.stringify(roomPairs)); 
-      console.log("All Room Pair Names" + JSON.stringify(roomPairsNames)); 
-      console.log("IDs of Players: " + roomPairs[numRooms].room); 
-      console.log("Names of Players in Room: " + roomPairsNames[numRooms].room); 
+      console.log("roomPairs: " + JSON.stringify(roomPairs)); 
+      console.log("roomPairsNames: " + JSON.stringify(roomPairsNames)); 
+      console.log("roomPairs[numRooms].room: " + roomPairs[numRooms].room); 
+      console.log("roomPairsNames[numRooms].room: " + roomPairsNames[numRooms].room); 
       numRooms++; 
-      let roomname = (players===[player_name,opponent_name]) ? player_name+"_"+opponent_name : opponent_name+"_"+player_name; 
+      let roomname = player_name+"_"+opponent_name;
       socket.join(roomname);
       opponent_socket.join(roomname);  
       
-  //   if(socket.id == opponent_id){
       io.in(roomname).emit("StartGame", {time: time, roomname: roomname, players: players}); 
-      console.log("Players: " + players); 
-  //  }else{
-  //    io.to(opponent_id+socket.id).emit("StartGame", {roomname: opponent_id+socket.id, color: black});
-  //   }
-      console.log("New Game Name: " + roomname);
+      console.log("players: " + players); 
+      console.log("roomname: " + roomname);
       
     }else{
       lobby.push([socket.id,username]);
@@ -174,6 +170,7 @@ io.on('connection', function(socket){
       if (roomPairsNames[i].room.includes(data["username"])){
         for (let j=0; j<2; j++){
           if (roomPairsNames[i].room[j]!==data["username"]){
+            console.log(roomPairs[i].room[j] + " Received a move!")
             console.log(roomPairsNames[i].room[j] + " Received a move!");
             io.to(roomPairs[i].room[j]).emit("OpponentMoved", {startSquare: data["startSquare"], endSquare: data["endSquare"]});
             break; 
