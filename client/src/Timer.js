@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+// Adapted from https://upmostly.com/tutorials/build-a-react-timer-component-using-hooks
+
 class Timer extends React.Component {
   constructor(props){
     super(props);
@@ -41,7 +43,7 @@ class Timer extends React.Component {
     let time = this.state.time; 
     return (
       <div className="app">
-        <div className="time">
+        <div classname="time">
           {Math.floor(time/60)}m{time%60}s
         </div>
         <div id="switch">

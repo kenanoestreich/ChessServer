@@ -694,8 +694,8 @@ class Game extends React.Component {
         if (playerColor!=="both"){
           console.log("Player " + playerColor + " played " + movename);
           socket.emit("MadeAMove", {username: sessionStorage.getItem("currentUser"), startSquare: squareNames[pieceClickedRow][pieceClickedCol], endSquare: squareNames[i][j]});
-          document.getElementById("timers").firstChild.switch();
-          document.getElementById("timers").children[1].switch();
+          // document.getElementById("timers").firstChild.switch();
+          // document.getElementById("timers").children[1].switch();
         }
         this.setState({
           history: history,
@@ -773,8 +773,9 @@ class Game extends React.Component {
     let history = JSON.parse(JSON.stringify(this.state.history));
     const current = history[step];
     let newSquares = JSON.parse(JSON.stringify(current.squares));
-    let color = this.state.color; 
-    let opponentColor = (color!=="both") ? ((this.state.color==="white") ? "black" : "white") : "black"; 
+    let color;
+    color = (color!=="both") ? this.state.color : "white";
+    let opponentColor = (color==="white") ? "black" : "white";
     //check if either king is in check and highlight if so 
     if (step===this.state.history.length-1){
       if (isKingCurrentlyInCheck(color,newSquares,color)){
