@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import io from 'socket.io-client';
+import Timer from './Timer.js'; 
 //FOR RICO: let socket = io("http://ec2-44-202-148-202.compute-1.amazonaws.com:3456/");
 let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
 
@@ -650,12 +651,12 @@ class Game extends React.Component {
         }
         else {
           miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
+          history.push({squares: newSquares, move: movename});
         }
         if (playerColor!=="both"){
           console.log("Player " + playerColor + " played " + movename);
           socket.emit("MadeAMove", {username: sessionStorage.getItem("currentUser"), startSquare: squareNames[pieceClickedRow][pieceClickedCol], endSquare: squareNames[i][j]});
         }
-        history.push({squares: newSquares, move: movename});
         this.setState({
           history: history,
           whitesTurn: newTurn,
@@ -666,11 +667,13 @@ class Game extends React.Component {
       }
       // If the game is Drawn By Insufficient Material, don't respond to clicks. 
       if (document.getElementById("status").innerHTML==="Game Drawn By Insufficient Material"){
+        console.log("Drawn By Insufficient Material")
         return;
       }
 
       // If the game is Drawn by Stalemate or done by Checkmate, don't respond to clicks. 
       if (isCheckmate("white",whitesTurn, newSquares)||isStalemate(whitesTurn, newSquares, "white")||(isCheckmate("black",whitesTurn,newSquares)||isStalemate(whitesTurn,newSquares,"black"))){
+        console.log("Checkmate or Stalemate")
         return; 
       }
       
@@ -1025,7 +1028,7 @@ if(sessionStorage.getItem("currentUser") !== null){
     ); 
   });
 }else{
-  root.render(<LoginForm />);
+  root.render(<Timer />);
 } 
 
 
