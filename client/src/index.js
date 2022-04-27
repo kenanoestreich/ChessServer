@@ -2,7 +2,10 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import io from 'socket.io-client';
-import Timer from './Timer.js'; 
+import Timer_10 from './Timer_10.js'; 
+import Timer_1 from './Timer_1.js';
+import Timer_5 from './Timer_5.js';
+import Timer_30 from './Timer_30.js';
 //FOR RICO: let socket = io("http://ec2-44-202-148-202.compute-1.amazonaws.com:3456/");
 let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
 
@@ -882,7 +885,15 @@ class LobbyPage extends React.Component{
         your_color = "black";
       }
       console.log(your_color);
-      root.render(<Game color={your_color}/>);
+      root.render(
+      <div>
+        <span>Your Time<Timer_1/>Opponent's Time<Timer_1/></span> 
+        <Game 
+          color={your_color}
+        />
+
+      </div>
+      );
     });
   }
 
@@ -1028,7 +1039,7 @@ if(sessionStorage.getItem("currentUser") !== null){
     ); 
   });
 }else{
-  root.render(<Timer />);
+  root.render(<LoginForm />);
 } 
 
 

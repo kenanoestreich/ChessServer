@@ -119,20 +119,20 @@ io.on('connection', function(socket){
     let username = data["username"];
     if(gametime == 1){
       console.log(`${username} joined One Min Lobby`);
-      getopponent(OneMin,username);
+      getopponent(OneMin,username,gametime);
     }else if(gametime == 5){
       console.log(`${username} joined Five Min Lobby`);
-      getopponent(FiveMin,username);
+      getopponent(FiveMin,username,gametime);
     }else if(gametime == 10){
       console.log(`${username} joined Ten Min Lobby`);
-      getopponent(TenMin,username);
+      getopponent(TenMin,username,gametime);
     }else if(gametime == 30){
       console.log(`${username} joined Thirty Min Lobby`);
-      getopponent(ThirtyMin,username);
+      getopponent(ThirtyMin,username,gametime);
     }
   });
 
-  function getopponent(lobby,username){
+  function getopponent(lobby,username,time){
     if(lobby[0]!=null){
       let opponent_id = lobby[0][0];
       let opponent_name = lobby[0][1];
@@ -155,9 +155,9 @@ io.on('connection', function(socket){
       let roomname = (players===[player_name,opponent_name]) ? player_name+"_"+opponent_name : opponent_name+"_"+player_name; 
       socket.join(roomname);
       opponent_socket.join(roomname);  
- 
+      
   //   if(socket.id == opponent_id){
-      io.to(roomname).emit("StartGame", {roomname: roomname, players: players}); 
+      io.in(roomname).emit("StartGame", {time: time, roomname: roomname, players: players}); 
       console.log("Players: " + players); 
   //  }else{
   //    io.to(opponent_id+socket.id).emit("StartGame", {roomname: opponent_id+socket.id, color: black});
