@@ -31,9 +31,9 @@ Best Practices (5 points)
 
 Creative Portion (15 points)
 
-
-RICO FOLLOW THESE INSTRUCTIONS TO GET EVERYTHING SET UP ON YOUR END: 
-
-- You'll need to update node on your web instance. Instructions to do this: https://phoenixnap.com/kb/update-node-js-version#ftoc-heading-3 (Second option for linux environment) You'll need to use sudo if you get permissions errors. 
-- Then you should be able to just pull the repository off github. 
-- Here's a page for integrating socket.io if you want to try to get that working: https://medium.com/@raj_36650/integrate-socket-io-with-node-js-express-2292ca13d891
+- Single player mode where one client controls both colors. 
+- Read-only history navigation for both multiplayer and single-player mode with correct move notations. 
+- Displaying legal moves via css backgrounds. 
+- Detecting if games are drawn by insufficient material. 
+- Correctly flip the board for different player colors.
+- Strictly enforcing illegal moves even if a piece could normally move there (i.e. if moving a certain piece to a certain square would put the king in check) 
