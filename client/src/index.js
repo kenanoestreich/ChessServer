@@ -1,7 +1,13 @@
+// Import all-encompassing requirements
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import io from 'socket.io-client';
+
+// Import necessary scripts from MoveScripts/
+import displayKnightMoves from './MoveScripts/Knight'
+import displayBishopMoves from './MoveScripts/Bishop'
+
 let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
 // import App from './App';
 
@@ -366,69 +372,6 @@ class Game extends React.Component {
 // ========================================
 
 root.render(<Game />); 
-
-function calculateWinner(squares) {
-  // Calculate if checkmate or stalemate
-  return null;
-}
-
-// ALL THE "display_____Moves" FUNCTIONS DO THE FOLLOWING (ONLY DIFFERENCE IS HOW THAT PIECE MOVES):
-// input current board state and piece location to move and change css for all the 
-// legal move squares to highlight a new color. 
-
-// Knights
-function displayKnightMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
-  miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]==blackKnight) 
-      || !whitesTurn && squares[currentPieceRow][currentPieceCol]==whiteKnight){
-    return miscSquares; 
-  }
-  let possibleSquares = [];
-  possibleSquares.push([currentPieceRow-2, currentPieceCol-1]);
-  possibleSquares.push([currentPieceRow-2, currentPieceCol+1]);
-  possibleSquares.push([currentPieceRow-1, currentPieceCol-2]);
-  possibleSquares.push([currentPieceRow-1, currentPieceCol+2]);
-  possibleSquares.push([currentPieceRow+1, currentPieceCol-2]);
-  possibleSquares.push([currentPieceRow+1, currentPieceCol+2]);
-  possibleSquares.push([currentPieceRow+2, currentPieceCol-1]);
-  possibleSquares.push([currentPieceRow+2, currentPieceCol+1]); 
-  for (let i=0; i<possibleSquares.length; i++) {
-    if (possibleSquares[i][0] >= 0 && possibleSquares[i][0] < 8 && 
-        possibleSquares[i][1] >= 0 && possibleSquares[i][1] < 8) {  
-      if ((whitesTurn && blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
-          || (!whitesTurn && whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
-        miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="threatened";
-      }
-      else if ((!whitesTurn && blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
-          || (whitesTurn && whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
-      }
-      else {
-        miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="possible";
-      }
-    }
-  }
-  miscSquares[currentPieceRow][currentPieceCol]="selected";
-  return miscSquares;
-}
-
-// Bishops 
-function displayBishopMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
-  miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]==blackBishop) 
-      || !whitesTurn && squares[currentPieceRow][currentPieceCol]==whiteBishop){
-    return miscSquares; 
-  }
-  // up and left "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,-1,squares,miscSquares,whitesTurn);
-  // up and right "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,-1,squares,miscSquares,whitesTurn)
-  // down and left "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,+1,squares,miscSquares,whitesTurn)
-  // down and right "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,+1,squares,miscSquares,whitesTurn)
-  miscSquares[currentPieceRow][currentPieceCol]="selected";
-  return miscSquares; 
-}
 
 // Pawns
 function displayPawnMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
