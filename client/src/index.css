@@ -92,6 +92,28 @@ ol, ul {
   background: #ddd;
 }
 
+.inchecksquare {
+  background: rgb(255, 72, 72);
+  border: 1px solid rgb(0, 0, 0);
+  float: left;
+  font-size: 40px;
+  line-height: 50px;
+  height: 50px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 50px;
+}
+
+.inchecksquare:focus {
+  outline: none;
+}
+
+.kbd-navigation .inchecksquare:focus {
+  background: #ddd;
+}
+
 .possiblesquare {
   background: rgb(225, 224, 164);
   border: 1px solid rgb(0, 0, 0);
@@ -136,10 +158,10 @@ ol, ul {
   background: #ddd;
 }
 
-/* .game {
+.game {
   display: flex;
   flex-direction: row;
-} */
+}
 
 .game-info {
   margin-left: 20px;
