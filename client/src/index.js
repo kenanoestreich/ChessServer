@@ -11,7 +11,7 @@ import io from 'socket.io-client';
 
 // Import necessary scripts from MoveScripts/
 import displayKnightMoves from './MoveScripts/Knight/KnightMoves'
-import displayBishopMoves from './MoveScripts/Bishop/Bishop'
+import displayBishopMoves from './MoveScripts/Bishop/BishopMoves'
 import checkAxis from './MoveScripts/CheckAxis';
 
 // Import Timer scripts

@@ -1,4 +1,4 @@
-import Enums from '../Enums.js'
+import Enums from '../../Enums.js'
 
 // ALL THE "display_____Moves" FUNCTIONS DO THE FOLLOWING (ONLY DIFFERENCE IS HOW THAT PIECE MOVES):
 // input current board state and piece location to move and change css for all the 
@@ -40,3 +40,4 @@ function displayKnightMoves(currentPieceRow, currentPieceCol, miscSquares, white
 }
 
 export default displayKnightMoves; 
+
