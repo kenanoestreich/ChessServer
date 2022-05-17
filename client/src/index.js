@@ -11,7 +11,9 @@ import io from 'socket.io-client';
 
 // Import necessary scripts from MoveScripts/
 import displayKnightMoves from './MoveScripts/Knight/KnightMoves'
+import displayKnightThreats from './MoveScripts/Knight/KnightThreats';
 import displayBishopMoves from './MoveScripts/Bishop/BishopMoves'
+import displayBishopThreats from './MoveScripts/Bishop/BishopThreats';
 import checkAxis from './MoveScripts/CheckAxis';
 
 // Import Timer scripts
@@ -1570,13 +1572,13 @@ function displayRookThreats(currentPieceRow, currentPieceCol, whitesTurn, square
     return miscSquares; 
   }
   // up "line of sight"
-  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,0,-1,squares,miscSquares,whitesTurn);
+  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,0,-1,squares,miscSquares,whitesTurn);
   // down "line of sight"
-  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,0,+1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,0,+1,squares,miscSquares,whitesTurn)
   // left "line of sight"
-  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,-1,0,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,-1,0,squares,miscSquares,whitesTurn)
   // right "line of sight"
-  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,+1,0,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,+1,0,squares,miscSquares,whitesTurn)
   miscSquares[currentPieceRow][currentPieceCol]="selected";
   return miscSquares; 
 }
@@ -1615,21 +1617,21 @@ function displayQueenThreats(currentPieceRow, currentPieceCol, whitesTurn, squar
     return miscSquares; 
   }
   // up "line of sight"
-  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,0,-1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,0,-1,squares,miscSquares,whitesTurn)
   // down "line of sight"
-  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,0,+1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,0,+1,squares,miscSquares,whitesTurn)
   // left "line of sight"
-  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,-1,0,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,-1,0,squares,miscSquares,whitesTurn)
   // right "line of sight"
-  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,+1,0,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,+1,0,squares,miscSquares,whitesTurn)
   // up and left "line of sight"
-  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,-1,-1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,-1,-1,squares,miscSquares,whitesTurn)
   // up and right "line of sight"
-  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,+1,-1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,+1,-1,squares,miscSquares,whitesTurn)
   // down and left "line of sight"
-  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,-1,+1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,-1,+1,squares,miscSquares,whitesTurn)
   // down and right "line of sight"
-  miscSquares=checkAxisAlternate(currentPieceRow,currentPieceCol,+1,+1,squares,miscSquares,whitesTurn)
+  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,+1,+1,squares,miscSquares,whitesTurn)
   miscSquares[currentPieceRow][currentPieceCol]="selected";
   return miscSquares; 
 }
@@ -1716,29 +1718,6 @@ function displayKingThreats(currentPieceRow, currentPieceCol, whitesTurn, square
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="possible";
       }
     }
-  }
-  return miscSquares;
-}
-
-// alternate CheckAxis that doesn't care about putting the king in check. 
-function checkAxisAlternate(currentPieceRow, currentPieceCol, rowDelta, colDelta, squares, miscSquares, whitesTurn){
-  let i=currentPieceRow+rowDelta;
-  let j=currentPieceCol+colDelta; 
-  while (i < 8 && i >=0 && j < 8 && j >=0) {
-    if (squares[i][j]===null){
-      miscSquares[i][j]="possible"; 
-    }
-    else if ((whitesTurn && Enums.whitePieces.includes(squares[i][j]))
-      || (!whitesTurn && Enums.blackPieces.includes(squares[i][j]))){
-      break; 
-    }
-    else if ((whitesTurn && Enums.blackPieces.includes(squares[i][j]))
-      || (!whitesTurn && Enums.whitePieces.includes(squares[i][j]))){
-      miscSquares[i][j]="threatened";
-      break; 
-    }
-    i+=rowDelta;
-    j+=colDelta;
   }
   return miscSquares;
 }
