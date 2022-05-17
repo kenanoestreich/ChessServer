@@ -10,7 +10,7 @@ import checkAxis from '../CheckAxis.js';
 function displayBishopMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
   miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
   if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.blackBishop) 
-      || !whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whiteBishop){
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whiteBishop)){
     return miscSquares; 
   }
   // up and left "line of sight"
