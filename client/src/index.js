@@ -25,7 +25,6 @@ import Timer from './Timer.js'
 
 // Import Enums
 import Enums from './Enums.js'
-import isKingCurrentlyInCheck from './CheckScripts/IsKingCurrentlyInCheck';
 
 // Set up Socket.io 
 let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
