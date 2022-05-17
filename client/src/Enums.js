@@ -1,16 +1,20 @@
 // enumerations for unicodes to make code readable
 
-const whiteKing = '♔'; 
-const whiteQueen = '♕';
-const whiteRook = '♖';
-const whiteBishop = '♗';
-const whiteKnight = '♘';
-const whitePawn = '♙';
-const blackKing = '♚'; 
-const blackQueen = '♛';
-const blackRook = '♜';
-const blackBishop = '♝';
-const blackKnight = '♞';
-const blackPawn = '♟';
-const whitePieces = [whiteKing,whiteQueen,whiteRook,whiteBishop,whiteKnight,whitePawn];
-const blackPieces = [blackKing,blackQueen,blackRook,blackBishop,blackKnight,blackPawn];
+const pieceEnums = {
+    whiteKing : '♔',
+    whiteQueen : '♕',
+    whiteRook : '♖',
+    whiteBishop : '♗',
+    whiteKnight : '♘',
+    whitePawn : '♙',
+    blackKing : '♚', 
+    blackQueen : '♛',
+    blackRook : '♜',
+    blackBishop : '♝',
+    blackKnight : '♞',
+    blackPawn : '♟',
+    whitePieces : [whiteKing,whiteQueen,whiteRook,whiteBishop,whiteKnight,whitePawn],
+    blackPieces : [blackKing,blackQueen,blackRook,blackBishop,blackKnight,blackPawn]
+}
+
+export default Enums; 

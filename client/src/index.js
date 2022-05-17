@@ -17,7 +17,7 @@ import displayBishopMoves from './MoveScripts/Bishop'
 import Timer from './Timer.js'
 
 // Import Enums
-import './Enums.js'
+import Enums from './Enums.js'
 
 // Set up Socket.io 
 let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
@@ -339,7 +339,7 @@ class Game extends React.Component {
         history: [
           {
             // make starting board; no longer okay to hardcode this
-            squares: [[blackRook,blackKnight,blackBishop,blackQueen,blackKing,blackBishop,blackKnight,blackRook],
+            squares: [[Enums.blackRook,blackKnight,blackBishop,blackQueen,blackKing,blackBishop,blackKnight,blackRook],
             [blackPawn,blackPawn,blackPawn,blackPawn,blackPawn,blackPawn,blackPawn,blackPawn],
             [null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],
             [null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],
