@@ -13,8 +13,8 @@ const pieceEnums = {
     blackBishop : '♝',
     blackKnight : '♞',
     blackPawn : '♟',
-    whitePieces : [whiteKing,whiteQueen,whiteRook,whiteBishop,whiteKnight,whitePawn],
-    blackPieces : [blackKing,blackQueen,blackRook,blackBishop,blackKnight,blackPawn]
+    whitePieces : ['♔','♕','♖','♗','♘','♙'],
+    blackPieces : ['♚','♛','♜','♝','♞','♟']
 }
 
 export default Enums; 
