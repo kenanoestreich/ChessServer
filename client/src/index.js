@@ -15,6 +15,7 @@ import displayKnightThreats from './MoveScripts/Knight/KnightThreats';
 import displayBishopMoves from './MoveScripts/Bishop/BishopMoves'
 import displayBishopThreats from './MoveScripts/Bishop/BishopThreats';
 import checkAxis from './MoveScripts/CheckAxis';
+import checkAxisThreat from './MoveScripts/CheckAxisThreat';
 
 // Import Timer scripts
 import Timer from './Timer.js'
