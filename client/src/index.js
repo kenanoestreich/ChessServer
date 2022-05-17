@@ -425,10 +425,10 @@ class Game extends React.Component {
     }
     // a piece was taken
     if (endpiece!==null){
-      if (blackPieces.includes(endpiece)){
+      if (Enums.blackPieces.includes(endpiece)){
         newTakenPieces.black.push(endpiece);
       }
-      else if (whitePieces.includes(endpiece)){
+      else if (Enums.whitePieces.includes(endpiece)){
         newTakenPieces.white.push(endpiece);
       }
       // find out which piece was clicked for naming the move
@@ -707,8 +707,8 @@ class Game extends React.Component {
         return; 
       }
 
-      else if ((blackPieces.includes(newSquares[i][j])&&((playerColor==="black")||(playerColor==="both"&&!whitesTurn)))||
-        (whitePieces.includes(newSquares[i][j])&&((playerColor==="white")||(playerColor==="both"&&whitesTurn)))){
+      else if ((Enums.blackPieces.includes(newSquares[i][j])&&((playerColor==="black")||(playerColor==="both"&&!whitesTurn)))||
+        (Enums.whitePieces.includes(newSquares[i][j])&&((playerColor==="white")||(playerColor==="both"&&whitesTurn)))){
         // All the following sections refer to clicking one of the current player's pieces on their turn. 
         // The square labels should be updated in this case, but nothing should be moved. 
         let tempColor = (this.state.color!=="both") ? this.state.color : "white"; 
@@ -1212,7 +1212,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol-1)>=0){
-        if (blackPieces.includes(squares[currentPieceRow-1][currentPieceCol-1])){
+        if (Enums.blackPieces.includes(squares[currentPieceRow-1][currentPieceCol-1])){
           miscSquares[currentPieceRow-1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
@@ -1222,7 +1222,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol+1)<8){
-        if (blackPieces.includes(squares[currentPieceRow-1][currentPieceCol+1])){
+        if (Enums.blackPieces.includes(squares[currentPieceRow-1][currentPieceCol+1])){
           miscSquares[currentPieceRow-1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
@@ -1252,7 +1252,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol-1)>=0){
-        if (whitePieces.includes(squares[currentPieceRow+1][currentPieceCol-1])){
+        if (Enums.whitePieces.includes(squares[currentPieceRow+1][currentPieceCol-1])){
           miscSquares[currentPieceRow+1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
@@ -1262,7 +1262,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol+1)<8){
-        if (whitePieces.includes(squares[currentPieceRow+1][currentPieceCol+1])){
+        if (Enums.whitePieces.includes(squares[currentPieceRow+1][currentPieceCol+1])){
           miscSquares[currentPieceRow+1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
@@ -1284,7 +1284,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol-1)>=0){
-        if (blackPieces.includes(squares[currentPieceRow-1][currentPieceCol-1])){
+        if (Enums.blackPieces.includes(squares[currentPieceRow-1][currentPieceCol-1])){
           miscSquares[currentPieceRow-1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
@@ -1294,7 +1294,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol+1)<8){
-        if (blackPieces.includes(squares[currentPieceRow-1][currentPieceCol+1])){
+        if (Enums.blackPieces.includes(squares[currentPieceRow-1][currentPieceCol+1])){
           miscSquares[currentPieceRow-1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
@@ -1316,7 +1316,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol-1)>=0){
-        if (whitePieces.includes(squares[currentPieceRow+1][currentPieceCol-1])){
+        if (Enums.whitePieces.includes(squares[currentPieceRow+1][currentPieceCol-1])){
           miscSquares[currentPieceRow+1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
@@ -1326,7 +1326,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol+1)<8){
-        if (whitePieces.includes(squares[currentPieceRow+1][currentPieceCol+1])){
+        if (Enums.whitePieces.includes(squares[currentPieceRow+1][currentPieceCol+1])){
           miscSquares[currentPieceRow+1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
@@ -1359,7 +1359,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol-1)>=0){
-        if (whitePieces.includes(squares[currentPieceRow-1][currentPieceCol-1])){
+        if (Enums.whitePieces.includes(squares[currentPieceRow-1][currentPieceCol-1])){
           miscSquares[currentPieceRow-1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
@@ -1369,7 +1369,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol+1)<8){
-        if (whitePieces.includes(squares[currentPieceRow-1][currentPieceCol+1])){
+        if (Enums.whitePieces.includes(squares[currentPieceRow-1][currentPieceCol+1])){
           miscSquares[currentPieceRow-1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
@@ -1399,7 +1399,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol-1)>=0){
-        if (blackPieces.includes(squares[currentPieceRow+1][currentPieceCol-1])){
+        if (Enums.blackPieces.includes(squares[currentPieceRow+1][currentPieceCol-1])){
           miscSquares[currentPieceRow+1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol,currentPieceRow,currentPieceCol,squares_copy)
@@ -1409,7 +1409,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol+1)<8){
-        if (blackPieces.includes(squares[currentPieceRow+1][currentPieceCol+1])){
+        if (Enums.blackPieces.includes(squares[currentPieceRow+1][currentPieceCol+1])){
           miscSquares[currentPieceRow+1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
@@ -1431,7 +1431,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol-1)>=0){
-        if (whitePieces.includes(squares[currentPieceRow-1][currentPieceCol-1])){
+        if (Enums.whitePieces.includes(squares[currentPieceRow-1][currentPieceCol-1])){
           miscSquares[currentPieceRow-1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
@@ -1441,7 +1441,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol+1)<8){
-        if (whitePieces.includes(squares[currentPieceRow-1][currentPieceCol+1])){
+        if (Enums.whitePieces.includes(squares[currentPieceRow-1][currentPieceCol+1])){
           miscSquares[currentPieceRow-1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow-1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
@@ -1463,7 +1463,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol-1)>=0){
-        if (blackPieces.includes(squares[currentPieceRow+1][currentPieceCol-1])){
+        if (Enums.blackPieces.includes(squares[currentPieceRow+1][currentPieceCol-1])){
           miscSquares[currentPieceRow+1][currentPieceCol-1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol-1,currentPieceRow,currentPieceCol,squares_copy)
@@ -1473,7 +1473,7 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       if ((currentPieceCol+1)<8){
-        if (blackPieces.includes(squares[currentPieceRow+1][currentPieceCol+1])){
+        if (Enums.blackPieces.includes(squares[currentPieceRow+1][currentPieceCol+1])){
           miscSquares[currentPieceRow+1][currentPieceCol+1]="threatened"; 
           squares_copy = JSON.parse(JSON.stringify(squares)); 
           newSquares = movePiece(currentPieceRow+1,currentPieceCol+1,currentPieceRow,currentPieceCol,squares_copy)
@@ -1655,8 +1655,8 @@ function displayKingMoves(currentPieceRow, currentPieceCol, whitesTurn, squares,
   for (let i=0; i<possibleSquares.length; i++) {
     if (possibleSquares[i][0] >= 0 && possibleSquares[i][0] < 8 && 
         possibleSquares[i][1] >= 0 && possibleSquares[i][1] < 8) {  
-      if ((whitesTurn && blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
-          || (!whitesTurn && whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
+      if ((whitesTurn && Enums.blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
+          || (!whitesTurn && Enums.whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="threatened";
         let squares_copy = JSON.parse(JSON.stringify(squares)); 
         newSquares = movePiece(possibleSquares[i][0],possibleSquares[i][1],currentPieceRow,currentPieceCol,squares_copy)
@@ -1664,8 +1664,8 @@ function displayKingMoves(currentPieceRow, currentPieceCol, whitesTurn, squares,
           miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]=null; 
         }
       }
-      else if ((!whitesTurn && blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
-          || (whitesTurn && whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
+      else if ((!whitesTurn && Enums.blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
+          || (whitesTurn && Enums.whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
       }
       else {
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="possible";
@@ -1704,12 +1704,12 @@ function displayKingThreats(currentPieceRow, currentPieceCol, whitesTurn, square
   for (let i=0; i<possibleSquares.length; i++) {
     if (possibleSquares[i][0] >= 0 && possibleSquares[i][0] < 8 && 
         possibleSquares[i][1] >= 0 && possibleSquares[i][1] < 8) {  
-      if ((whitesTurn && blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
-          || (!whitesTurn && whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
+      if ((whitesTurn && Enums.blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
+          || (!whitesTurn && Enums.whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="threatened";
       }
-      else if ((!whitesTurn && blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
-          || (whitesTurn && whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
+      else if ((!whitesTurn && Enums.blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
+          || (whitesTurn && Enums.whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
       }
       else {
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="possible";
@@ -1727,12 +1727,12 @@ function checkAxisAlternate(currentPieceRow, currentPieceCol, rowDelta, colDelta
     if (squares[i][j]===null){
       miscSquares[i][j]="possible"; 
     }
-    else if ((whitesTurn && whitePieces.includes(squares[i][j]))
-      || (!whitesTurn && blackPieces.includes(squares[i][j]))){
+    else if ((whitesTurn && Enums.whitePieces.includes(squares[i][j]))
+      || (!whitesTurn && Enums.blackPieces.includes(squares[i][j]))){
       break; 
     }
-    else if ((whitesTurn && blackPieces.includes(squares[i][j]))
-      || (!whitesTurn && whitePieces.includes(squares[i][j]))){
+    else if ((whitesTurn && Enums.blackPieces.includes(squares[i][j]))
+      || (!whitesTurn && Enums.whitePieces.includes(squares[i][j]))){
       miscSquares[i][j]="threatened";
       break; 
     }
@@ -1871,8 +1871,8 @@ function isCheckmate(kingColor,squares, pawnColor){
   if (isKingCurrentlyInCheck(kingColor, squares,pawnColor)){
     for (let i=0; i<8; i++){
       for (let j=0; j<8; j++){
-        if (((kingColor==="both" || kingColor==="white") && whitePieces.includes(squares[i][j])) ||
-          ((kingColor==="both" || kingColor==="black") && blackPieces.includes(squares[i][j]))) {
+        if (((kingColor==="both" || kingColor==="white") && Enums.whitePieces.includes(squares[i][j])) ||
+          ((kingColor==="both" || kingColor==="black") && Enums.blackPieces.includes(squares[i][j]))) {
           if (((kingColor==="both" || kingColor==="white") && squares[i][j]===Enums.whiteKnight) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===Enums.blackKnight)){
             pieceMoves = displayKnightMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
@@ -1920,8 +1920,8 @@ function isStalemate(kingColor, squares, pawnColor){
   if (!isKingCurrentlyInCheck(kingColor, squares, pawnColor)){
     for (let i=0; i<8; i++){
       for (let j=0; j<8; j++){
-        if ((whitesTurn && whitePieces.includes(squares[i][j])) ||
-          (!whitesTurn && blackPieces.includes(squares[i][j]))) {
+        if ((whitesTurn && Enums.whitePieces.includes(squares[i][j])) ||
+          (!whitesTurn && Enums.blackPieces.includes(squares[i][j]))) {
           if ((whitesTurn && squares[i][j]===Enums.whiteKnight) || (!whitesTurn && squares[i][j]===Enums.blackKnight)){
             pieceMoves = displayKnightMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
@@ -1966,7 +1966,7 @@ function isStalemate(kingColor, squares, pawnColor){
 // King, Queen, Rook, Bishop, Knight, Pawn
 function findPieceAndDisplay(pieceRow, pieceCol, whitesTurn, playerColor, squares) {
   for (let i=0; i<6; i++){
-    if (squares[pieceRow][pieceCol]===whitePieces[i] || squares[pieceRow][pieceCol]===blackPieces[i]) {
+    if (squares[pieceRow][pieceCol]===Enums.whitePieces[i] || squares[pieceRow][pieceCol]===Enums.blackPieces[i]) {
       if (isKingCurrentlyInCheck("white",squares, playerColor)){
         let miscSquares;
         if (i===0){
