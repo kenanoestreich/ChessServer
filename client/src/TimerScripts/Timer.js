@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 // Adapted from https://upmostly.com/tutorials/build-a-react-timer-component-using-hooks
 

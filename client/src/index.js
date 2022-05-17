@@ -21,7 +21,7 @@ import isCheckmate from './CheckScripts/IsCheckmate';
 import movePiece from './MoveScripts/MovePiece';
 
 // Import Timer scripts
-import Timer from './Timer.js'
+import Timer from './TimerScripts/Timer.js'
 
 // Import Enums
 import Enums from './Enums.js'
