@@ -16,24 +16,11 @@ import displayBishopMoves from './MoveScripts/Bishop'
 // Import Timer scripts
 import Timer from './Timer.js'
 
+// Import Enums
+import './Enums.js'
+
 // Set up Socket.io 
 let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
-
-// enumerations for unicodes to make code readable
-const whiteKing = '♔'; 
-const whiteQueen = '♕';
-const whiteRook = '♖';
-const whiteBishop = '♗';
-const whiteKnight = '♘';
-const whitePawn = '♙';
-const blackKing = '♚'; 
-const blackQueen = '♛';
-const blackRook = '♜';
-const blackBishop = '♝';
-const blackKnight = '♞';
-const blackPawn = '♟';
-const whitePieces = [whiteKing,whiteQueen,whiteRook,whiteBishop,whiteKnight,whitePawn];
-const blackPieces = [blackKing,blackQueen,blackRook,blackBishop,blackKnight,blackPawn];
 
 // Client's color for online game
 let your_color;

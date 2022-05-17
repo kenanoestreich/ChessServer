@@ -1,3 +1,5 @@
+import '../Enums.js'
+
 // ALL THE "display_____Moves" FUNCTIONS DO THE FOLLOWING (ONLY DIFFERENCE IS HOW THAT PIECE MOVES):
 // input current board state and piece location to move and change css for all the 
 // legal move squares to highlight a new color. 
