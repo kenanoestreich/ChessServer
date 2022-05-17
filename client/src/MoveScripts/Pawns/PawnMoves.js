@@ -1,4 +1,5 @@
 import Enums from "../../Enums";
+import movePiece from "../MovePiece";
 
 // Pawns
 function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerColor, squares) {
