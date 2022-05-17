@@ -1,3 +1,8 @@
+// Largely serving as my "main" for now until I decide how best to organize all this code
+
+// STARTING POINT FOR ALL THIS CODE WAS THE FOLLOWING TUTORIAL CODE: 
+// https://reactjs.org/tutorial/tutorial.html
+
 // Import all-encompassing requirements
 import React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -8,12 +13,11 @@ import io from 'socket.io-client';
 import displayKnightMoves from './MoveScripts/Knight'
 import displayBishopMoves from './MoveScripts/Bishop'
 
+// Import Timer scripts
 import Timer from './Timer.js'
-//FOR RICO: let socket = io("http://ec2-44-202-148-202.compute-1.amazonaws.com:3456/");
-let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
 
-// STARTING POINT FOR ALL THIS CODE WAS THE FOLLOWING TUTORIAL CODE: 
-// https://reactjs.org/tutorial/tutorial.html
+// Set up Socket.io 
+let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
 
 // enumerations for unicodes to make code readable
 const whiteKing = '♔'; 
