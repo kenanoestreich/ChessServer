@@ -1,4 +1,4 @@
-import '../Enums.js'
+import Enums from '../Enums.js'
 
 // helper function for bishops, rooks, and queens
 
@@ -9,12 +9,12 @@ function checkAxis(currentPieceRow, currentPieceCol, rowDelta, colDelta, squares
     if (squares[i][j]==null){
       miscSquares[i][j]="possible"; 
     }
-    else if ((whitesTurn && whitePieces.includes(squares[i][j]))
-      || (!whitesTurn && blackPieces.includes(squares[i][j]))){
+    else if ((whitesTurn && Enums.whitePieces.includes(squares[i][j]))
+      || (!whitesTurn && Enums.blackPieces.includes(squares[i][j]))){
       break; 
     }
-    else if ((whitesTurn && blackPieces.includes(squares[i][j]))
-      || (!whitesTurn && whitePieces.includes(squares[i][j]))){
+    else if ((whitesTurn && Enums.blackPieces.includes(squares[i][j]))
+      || (!whitesTurn && Enums.whitePieces.includes(squares[i][j]))){
       miscSquares[i][j]="threatened";
       break; 
     }

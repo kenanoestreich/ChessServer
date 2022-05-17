@@ -1,4 +1,4 @@
-import '../Enums.js'
+import Enums from '../Enums.js'
 
 // ALL THE "display_____Moves" FUNCTIONS DO THE FOLLOWING (ONLY DIFFERENCE IS HOW THAT PIECE MOVES):
 // input current board state and piece location to move and change css for all the 
@@ -7,8 +7,8 @@ import '../Enums.js'
 // Knights
 function displayKnightMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
   miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]==blackKnight) 
-      || !whitesTurn && squares[currentPieceRow][currentPieceCol]==whiteKnight){
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]==Enums.blackKnight) 
+      || !whitesTurn && squares[currentPieceRow][currentPieceCol]==Enums.whiteKnight){
     return miscSquares; 
   }
   let possibleSquares = [];
@@ -23,12 +23,12 @@ function displayKnightMoves(currentPieceRow, currentPieceCol, miscSquares, white
   for (let i=0; i<possibleSquares.length; i++) {
     if (possibleSquares[i][0] >= 0 && possibleSquares[i][0] < 8 && 
         possibleSquares[i][1] >= 0 && possibleSquares[i][1] < 8) {  
-      if ((whitesTurn && blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
-          || (!whitesTurn && whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
+      if ((whitesTurn && Enums.blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
+          || (!whitesTurn && Enums.whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="threatened";
       }
-      else if ((!whitesTurn && blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
-          || (whitesTurn && whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
+      else if ((!whitesTurn && Enums.blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
+          || (whitesTurn && Enums.whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
       }
       else {
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="possible";

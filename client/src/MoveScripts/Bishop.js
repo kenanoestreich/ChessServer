@@ -1,4 +1,4 @@
-import '../Enums.js'
+import Enums from '../Enums.js'
 
 // ALL THE "display_____Moves" FUNCTIONS DO THE FOLLOWING (ONLY DIFFERENCE IS HOW THAT PIECE MOVES):
 // input current board state and piece location to move and change css for all the 
@@ -8,8 +8,8 @@ import '../Enums.js'
 
 function displayBishopMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
   miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]==blackBishop) 
-      || !whitesTurn && squares[currentPieceRow][currentPieceCol]==whiteBishop){
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]==Enums.blackBishop) 
+      || !whitesTurn && squares[currentPieceRow][currentPieceCol]==Enums.whiteBishop){
     return miscSquares; 
   }
   // up and left "line of sight"
