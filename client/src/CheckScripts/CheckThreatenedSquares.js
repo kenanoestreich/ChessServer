@@ -5,6 +5,7 @@ import displayKnightThreats from "../MoveScripts/Knights/KnightThreats";
 import displayBishopThreats from "../MoveScripts/Bishops/BishopThreats";
 import displayQueenThreats from "../MoveScripts/Queens/QueenThreats";
 import displayKingThreats from "../MoveScripts/Kings/KingThreats";
+import squaresCombiner from "../HelperScripts/SquaresCombiner";
 
 // Function for compiling all squares the opponent threatens
 function checkThreatenedSquares(opponentColor, squares, playerColor){

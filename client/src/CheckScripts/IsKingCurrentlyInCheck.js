@@ -1,4 +1,5 @@
 import Enums from "../Enums";
+import checkThreatenedSquares from "./CheckThreatenedSquares";
 
 // Function to detect if King is CURRENTLY in check. 
 // Will be called recursively after prospective moves to see if the move gets the king out of check. 
