@@ -7,19 +7,21 @@ import '../Enums.js'
 // Bishops 
 
 function displayBishopMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
-    miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-    if ((whitesTurn && squares[currentPieceRow][currentPieceCol]==blackBishop) 
-        || !whitesTurn && squares[currentPieceRow][currentPieceCol]==whiteBishop){
-      return miscSquares; 
-    }
-    // up and left "line of sight"
-    miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,-1,squares,miscSquares,whitesTurn);
-    // up and right "line of sight"
-    miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,-1,squares,miscSquares,whitesTurn)
-    // down and left "line of sight"
-    miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,+1,squares,miscSquares,whitesTurn)
-    // down and right "line of sight"
-    miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,+1,squares,miscSquares,whitesTurn)
-    miscSquares[currentPieceRow][currentPieceCol]="selected";
+  miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]==blackBishop) 
+      || !whitesTurn && squares[currentPieceRow][currentPieceCol]==whiteBishop){
     return miscSquares; 
   }
+  // up and left "line of sight"
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,-1,squares,miscSquares,whitesTurn);
+  // up and right "line of sight"
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,-1,squares,miscSquares,whitesTurn)
+  // down and left "line of sight"
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,+1,squares,miscSquares,whitesTurn)
+  // down and right "line of sight"
+  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,+1,squares,miscSquares,whitesTurn)
+  miscSquares[currentPieceRow][currentPieceCol]="selected";
+  return miscSquares; 
+}
+
+export default displayBishopMoves; 
