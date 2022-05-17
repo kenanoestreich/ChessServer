@@ -1719,42 +1719,6 @@ function displayKingThreats(currentPieceRow, currentPieceCol, whitesTurn, square
   return miscSquares;
 }
 
-// helper function for bishops, rooks, and queens
-function checkAxis(currentPieceRow, currentPieceCol, rowDelta, colDelta, squares, miscSquares, whitesTurn, playerColor){
-  let i=currentPieceRow+rowDelta;
-  let j=currentPieceCol+colDelta; 
-  let squares_copy;
-  let newSquares;
-  let color = (whitesTurn) ? "white" : "black"; 
-  while (i < 8 && i >=0 && j < 8 && j >=0) {
-    if (squares[i][j]===null){
-      miscSquares[i][j]="possible"; 
-      squares_copy = JSON.parse(JSON.stringify(squares)); 
-      newSquares = movePiece(i,j,currentPieceRow,currentPieceCol,squares_copy)
-      if (isKingCurrentlyInCheck(color,newSquares,playerColor)){
-        miscSquares[i][j]=null; 
-      }
-    }
-    else if ((whitesTurn && whitePieces.includes(squares[i][j]))
-      || (!whitesTurn && blackPieces.includes(squares[i][j]))){
-      break; 
-    }
-    else if ((whitesTurn && blackPieces.includes(squares[i][j]))
-      || (!whitesTurn && whitePieces.includes(squares[i][j]))){
-      miscSquares[i][j]="threatened";
-      squares_copy = JSON.parse(JSON.stringify(squares)); 
-      newSquares = movePiece(i,j,currentPieceRow,currentPieceCol,squares_copy)
-      if (isKingCurrentlyInCheck(color,newSquares,playerColor)){
-        miscSquares[i][j]=null; 
-      }
-      break; 
-    }
-    i+=rowDelta
-    j+=colDelta;
-  }
-  return miscSquares;
-}
-
 // alternate CheckAxis that doesn't care about putting the king in check. 
 function checkAxisAlternate(currentPieceRow, currentPieceCol, rowDelta, colDelta, squares, miscSquares, whitesTurn){
   let i=currentPieceRow+rowDelta;
