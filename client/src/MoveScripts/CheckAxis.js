@@ -1,3 +1,5 @@
+import '../Enums.js'
+
 // helper function for bishops, rooks, and queens
 
 function checkAxis(currentPieceRow, currentPieceCol, rowDelta, colDelta, squares, miscSquares, whitesTurn){
