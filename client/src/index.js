@@ -10,8 +10,8 @@ import './index.css';
 import io from 'socket.io-client';
 
 // Import necessary scripts from MoveScripts/
-import displayKnightMoves from './MoveScripts/Knight'
-import displayBishopMoves from './MoveScripts/Bishop'
+import displayKnightMoves from './MoveScripts/Knight/KnightMoves'
+import displayBishopMoves from './MoveScripts/Bishop/Bishop'
 import checkAxis from './MoveScripts/CheckAxis';
 
 // Import Timer scripts
