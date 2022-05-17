@@ -9,13 +9,16 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import io from 'socket.io-client';
 
-// Import necessary scripts from MoveScripts/
+// Import necessary scripts from HelperScripts/
 import findPieceAndDisplay from './HelperScripts/FindPieceAndDisplay';
 
 // Import necessary scripts from CheckScripts/
 import isKingCurrentlyInCheck from './CheckScripts/IsKingCurrentlyInCheck';
 import isStalemate from './CheckScripts/IsStalemate';
 import isCheckmate from './CheckScripts/IsCheckmate';
+
+// Import necessary scripts from MoveScripts/ 
+import movePiece from './MoveScripts/MovePiece';
 
 // Import Timer scripts
 import Timer from './Timer.js'
