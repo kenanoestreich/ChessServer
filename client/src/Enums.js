@@ -1,6 +1,6 @@
 // enumerations for unicodes to make code readable
 
-const pieceEnums = {
+const Enums = {
     whiteKing : '♔',
     whiteQueen : '♕',
     whiteRook : '♖',
