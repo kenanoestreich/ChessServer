@@ -1,5 +1,6 @@
 import Enums from "../../Enums";
 import movePiece from "../MovePiece";
+import isKingCurrentlyInCheck from "../../CheckScripts/IsKingCurrentlyInCheck";
 
 // Pawns
 function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerColor, squares) {
