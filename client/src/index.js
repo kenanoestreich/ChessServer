@@ -15,6 +15,7 @@ import findPieceAndDisplay from './HelperScripts/FindPieceAndDisplay';
 // Import necessary scripts from CheckScripts/
 import isKingCurrentlyInCheck from './CheckScripts/IsKingCurrentlyInCheck';
 import isStalemate from './CheckScripts/IsStalemate';
+import isCheckmate from './CheckScripts/IsCheckmate';
 
 // Import Timer scripts
 import Timer from './Timer.js'
