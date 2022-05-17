@@ -17,11 +17,15 @@ import displayPawnMoves from './MoveScripts/Pawns/PawnMoves';
 import displayRookMoves from './MoveScripts/Rooks/RookMoves';
 import displayKingMoves from './MoveScripts/Kings/KingMoves';
 
+// Import necessary scripts from CheckScripts/
+import isKingCurrentlyInCheck from './CheckScripts/IsKingCurrentlyInCheck';
+
 // Import Timer scripts
 import Timer from './Timer.js'
 
 // Import Enums
 import Enums from './Enums.js'
+import isKingCurrentlyInCheck from './CheckScripts/IsKingCurrentlyInCheck';
 
 // Set up Socket.io 
 let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
