@@ -5,8 +5,8 @@ import Enums from '../../Enums.js'
 // legal move squares to highlight a new color. 
 
 // Knights
-function displayKnightMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
-  miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+function displayKnightMoves(currentPieceRow, currentPieceCol, whitesTurn, squares) {
+  let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
   if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.blackKnight) 
       || !whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whiteKnight){
     return miscSquares; 

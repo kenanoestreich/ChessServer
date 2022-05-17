@@ -1960,10 +1960,10 @@ function findPieceAndDisplay(pieceRow, pieceCol, whitesTurn, playerColor, square
           miscSquares = displayRookMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor); 
         }
         if (i===3){
-          miscSquares = displayBishopMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor); 
+          miscSquares = displayBishopMoves(pieceRow,pieceCol,whitesTurn,squares); 
         }
         if (i===4){
-          miscSquares = displayKnightMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor); 
+          miscSquares = displayKnightMoves(pieceRow,pieceCol,whitesTurn,squares); 
         }
         if (i===5){
           miscSquares = displayPawnMoves(pieceRow,pieceCol,whitesTurn,playerColor,squares); 

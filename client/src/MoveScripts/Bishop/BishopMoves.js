@@ -7,8 +7,8 @@ import checkAxis from '../CheckAxis.js';
 
 // Bishops 
 
-function displayBishopMoves(currentPieceRow, currentPieceCol, miscSquares, whitesTurn, squares) {
-  miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+function displayBishopMoves(currentPieceRow, currentPieceCol, whitesTurn, squares) {
+  let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
   if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.blackBishop) 
       || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whiteBishop)){
     return miscSquares; 
