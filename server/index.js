@@ -12,10 +12,6 @@ const PORT = process.env.PORT || 3456;
 
 const connection = mysql.createConnection({
   host: 'localhost',
-  /* FOR RICO:
-  user: 'root',
-  password: 'Rock2001',
-  */
   user: 'wustl_inst',
   password: 'wustl_pass',
   database: 'Chess'
@@ -23,7 +19,6 @@ const connection = mysql.createConnection({
 
 const io = require("socket.io")(http,{
   cors:{
-   //FOR RICO: origin: 'http://ec2-44-202-148-202.compute-1.amazonaws.com:3000',
     origin: 'http://ec2-184-73-74-122.compute-1.amazonaws.com:3000',
     methods: ["GET", "POST"]
   }
