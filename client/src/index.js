@@ -10,16 +10,16 @@ import './index.css';
 import io from 'socket.io-client';
 
 // Import necessary scripts from MoveScripts/
-import displayKnightMoves from './MoveScripts/Knight/KnightMoves';
-import displayKnightThreats from './MoveScripts/Knight/KnightThreats';
-import displayBishopMoves from './MoveScripts/Bishop/BishopMoves';
-import displayBishopThreats from './MoveScripts/Bishop/BishopThreats';
+import displayKnightMoves from './MoveScripts/Knights/KnightMoves';
+import displayKnightThreats from './MoveScripts/Knights/KnightThreats';
+import displayBishopMoves from './MoveScripts/Bishops/BishopMoves';
+import displayBishopThreats from './MoveScripts/Bishops/BishopThreats';
 import displayQueenMoves from './MoveScripts/Queens/QueenMoves';
 import displayQueenThreats from './MoveScripts/Queens/QueenThreats';
 import displayPawnMoves from './MoveScripts/Pawns/PawnMoves';
-
-import checkAxis from './MoveScripts/CheckAxis';
-import checkAxisThreat from './MoveScripts/CheckAxisThreat';
+import displayPawnThreats from './MoveScripts/Pawns/PawnThreats';
+import displayRookMoves from './MoveScripts/Rooks/RookMoves';
+import displayRookThreats from './MoveScripts/Rooks/RookThreats';
 
 // Import Timer scripts
 import Timer from './Timer.js'
@@ -1187,43 +1187,6 @@ if(sessionStorage.getItem("currentUser") !== null){
 }else{
   root.render(<LoginForm />);
 } 
-
-// Rooks 
-function displayRookMoves(currentPieceRow, currentPieceCol, whitesTurn, squares, playerColor) {
-  let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.blackRook) 
-      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whiteRook)){
-    return miscSquares; 
-  }
-  // up "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,0,-1,squares,miscSquares,whitesTurn,playerColor);
-  // down "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,0,+1,squares,miscSquares,whitesTurn,playerColor)
-  // left "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,-1,0,squares,miscSquares,whitesTurn,playerColor)
-  // right "line of sight"
-  miscSquares=checkAxis(currentPieceRow,currentPieceCol,+1,0,squares,miscSquares,whitesTurn,playerColor)
-  miscSquares[currentPieceRow][currentPieceCol]="selected";
-  return miscSquares; 
-}
-
-function displayRookThreats(currentPieceRow, currentPieceCol, whitesTurn, squares) {
-  let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.blackRook) 
-      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whiteRook)){
-    return miscSquares; 
-  }
-  // up "line of sight"
-  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,0,-1,squares,miscSquares,whitesTurn);
-  // down "line of sight"
-  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,0,+1,squares,miscSquares,whitesTurn)
-  // left "line of sight"
-  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,-1,0,squares,miscSquares,whitesTurn)
-  // right "line of sight"
-  miscSquares=checkAxisThreat(currentPieceRow,currentPieceCol,+1,0,squares,miscSquares,whitesTurn)
-  miscSquares[currentPieceRow][currentPieceCol]="selected";
-  return miscSquares; 
-}
 
 // Kings
 // TO DO: NEED TO NOT DISPLAY MOVES THAT WOULD PUT THE KING IN CHECK AND CASTLING
