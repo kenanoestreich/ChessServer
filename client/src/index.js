@@ -309,12 +309,12 @@ class Game extends React.Component {
         history: [
           {
             // make starting board; no longer okay to hardcode this
-            squares: [[whiteRook,whiteKnight,whiteBishop,whiteKing,whiteQueen,whiteBishop,whiteKnight,whiteRook],
-            [whitePawn,whitePawn,whitePawn,whitePawn,whitePawn,whitePawn,whitePawn,whitePawn],
+            squares: [[Enums.whiteRook,Enums.whiteKnight,Enums.whiteBishop,Enums.whiteKing,Enums.whiteQueen,Enums.whiteBishop,Enums.whiteKnight,Enums.whiteRook],
+            [Enums.whitePawn,Enums.whitePawn,Enums.whitePawn,Enums.whitePawn,Enums.whitePawn,Enums.whitePawn,Enums.whitePawn,Enums.whitePawn],
             [null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],
             [null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],
-            [blackPawn,blackPawn,blackPawn,blackPawn,blackPawn,blackPawn,blackPawn,blackPawn],
-            [blackRook,blackKnight,blackBishop,blackKing,blackQueen,blackBishop,blackKnight,blackRook]],
+            [Enums.blackPawn,Enums.blackPawn,Enums.blackPawn,Enums.blackPawn,Enums.blackPawn,Enums.blackPawn,Enums.blackPawn,Enums.blackPawn],
+            [Enums.blackRook,Enums.blackKnight,Enums.blackBishop,Enums.blackKing,Enums.blackQueen,Enums.blackBishop,Enums.blackKnight,Enums.blackRook]],
 
             move: "Game Start"
           }
@@ -339,12 +339,12 @@ class Game extends React.Component {
         history: [
           {
             // make starting board; no longer okay to hardcode this
-            squares: [[Enums.blackRook,blackKnight,blackBishop,blackQueen,blackKing,blackBishop,blackKnight,blackRook],
-            [blackPawn,blackPawn,blackPawn,blackPawn,blackPawn,blackPawn,blackPawn,blackPawn],
+            squares: [[Enums.blackRook,Enums.blackKnight,Enums.blackBishop,Enums.blackQueen,Enums.blackKing,Enums.blackBishop,Enums.blackKnight,Enums.blackRook],
+            [Enums.blackPawn,Enums.blackPawn,Enums.blackPawn,Enums.blackPawn,Enums.blackPawn,Enums.blackPawn,Enums.blackPawn,Enums.blackPawn],
             [null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],
             [null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],
-            [whitePawn,whitePawn,whitePawn,whitePawn,whitePawn,whitePawn,whitePawn,whitePawn],
-            [whiteRook,whiteKnight,whiteBishop,whiteQueen,whiteKing,whiteBishop,whiteKnight,whiteRook]],
+            [Enums.whitePawn,Enums.whitePawn,Enums.whitePawn,Enums.whitePawn,Enums.whitePawn,Enums.whitePawn,Enums.whitePawn,Enums.whitePawn],
+            [Enums.whiteRook,Enums.whiteKnight,Enums.whiteBishop,Enums.whiteQueen,Enums.whiteKing,Enums.whiteBishop,Enums.whiteKnight,Enums.whiteRook]],
 
             move: "Game Start"
           }
@@ -432,22 +432,22 @@ class Game extends React.Component {
         newTakenPieces.white.push(endpiece);
       }
       // find out which piece was clicked for naming the move
-      if ((startpiece===blackKing)||(startpiece===whiteKing)){
+      if ((startpiece===Enums.blackKing)||(startpiece===Enums.whiteKing)){
         movename="Kx"+endname; 
       }
-      else if ((startpiece===blackBishop)||(startpiece===whiteBishop)){
+      else if ((startpiece===Enums.blackBishop)||(startpiece===Enums.whiteBishop)){
         movename="Bx"+endname; 
       }
-      else if ((startpiece===blackKnight)||(startpiece===whiteKnight)){
+      else if ((startpiece===Enums.blackKnight)||(startpiece===Enums.whiteKnight)){
         movename="Nx"+endname; 
       }
-      else if ((startpiece===blackQueen)||(startpiece===whiteQueen)){
+      else if ((startpiece===Enums.blackQueen)||(startpiece===Enums.whiteQueen)){
         movename="Qx"+endname; 
       }
-      else if ((startpiece===blackRook)||(startpiece===whiteRook)){
+      else if ((startpiece===Enums.blackRook)||(startpiece===Enums.whiteRook)){
         movename="Rx"+endname; 
       }
-      else if ((startpiece===blackPawn)||(startpiece===whitePawn)){
+      else if ((startpiece===Enums.blackPawn)||(startpiece===Enums.whitePawn)){
         movename=startname;
         movename=movename.charAt(0)+"x"+endname; 
       }
@@ -455,22 +455,22 @@ class Game extends React.Component {
     // no piece was taken
     else {
       // find out which piece was clicked for naming the move
-      if ((startpiece===blackKing)||(startpiece===whiteKing)){
+      if ((startpiece===Enums.blackKing)||(startpiece===Enums.whiteKing)){
         movename="K"+endname;
       }
-      else if ((startpiece===blackBishop)||(startpiece===whiteBishop)){
+      else if ((startpiece===Enums.blackBishop)||(startpiece===Enums.whiteBishop)){
         movename="B"+endname;
       }
-      else if ((startpiece===blackKnight)||(startpiece===whiteKnight)){
+      else if ((startpiece===Enums.blackKnight)||(startpiece===Enums.whiteKnight)){
         movename="N"+endname;
       }
-      else if ((startpiece===blackQueen)||(startpiece===whiteQueen)){
+      else if ((startpiece===Enums.blackQueen)||(startpiece===Enums.whiteQueen)){
         movename="Q"+endname;
       }
-      else if ((startpiece===blackRook)||(startpiece===whiteRook)){
+      else if ((startpiece===Enums.blackRook)||(startpiece===Enums.whiteRook)){
         movename="R"+endname;
       }
-      else if ((startpiece===blackPawn)||(startpiece===whitePawn)){
+      else if ((startpiece===Enums.blackPawn)||(startpiece===Enums.whitePawn)){
         movename=endname;
       }
     }
@@ -489,8 +489,8 @@ class Game extends React.Component {
 
       for (let i=0; i<8; i++){
         for (let j=0; j<8; j++){
-          if (((playerColor==="white") && newSquares[i][j]===whiteKing) ||
-              ((playerColor==="black") && newSquares[i][j]===blackKing)){
+          if (((playerColor==="white") && newSquares[i][j]===Enums.whiteKing) ||
+              ((playerColor==="black") && newSquares[i][j]===Enums.blackKing)){
             miscSquares[i][j]="incheck";
           }
         }
@@ -554,7 +554,7 @@ class Game extends React.Component {
       let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
       for (let i=0; i<8; i++){
         for (let j=0; j<8; j++){
-          if (newSquares[i][j]===whiteKing){
+          if (newSquares[i][j]===Enums.whiteKing){
             miscSquares[i][j]="incheck"
           }
         }
@@ -567,7 +567,7 @@ class Game extends React.Component {
       let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
       for (let i=0; i<8; i++){
         for (let j=0; j<8; j++){
-          if (newSquares[i][j]===blackKing){
+          if (newSquares[i][j]===Enums.blackKing){
             miscSquares[i][j]="incheck"
           }
         }
@@ -621,22 +621,22 @@ class Game extends React.Component {
  
         if (newMiscSquares[i][j]==="threatened"){
           // find out which piece was clicked for naming the move
-          if ((newSquares[pieceClickedRow][pieceClickedCol]===blackKing)||(newSquares[pieceClickedRow][pieceClickedCol]===whiteKing)){
+          if ((newSquares[pieceClickedRow][pieceClickedCol]===Enums.blackKing)||(newSquares[pieceClickedRow][pieceClickedCol]===Enums.whiteKing)){
             movename="Kx"+this.state.squareNames[i][j];
           }
-          else if ((newSquares[pieceClickedRow][pieceClickedCol]===blackBishop)||(newSquares[pieceClickedRow][pieceClickedCol]===whiteBishop)){
+          else if ((newSquares[pieceClickedRow][pieceClickedCol]===Enums.blackBishop)||(newSquares[pieceClickedRow][pieceClickedCol]===Enums.whiteBishop)){
             movename="Bx"+this.state.squareNames[i][j];
           }
-          else if ((newSquares[pieceClickedRow][pieceClickedCol]===blackKnight)||(newSquares[pieceClickedRow][pieceClickedCol]===whiteKnight)){
+          else if ((newSquares[pieceClickedRow][pieceClickedCol]===Enums.blackKnight)||(newSquares[pieceClickedRow][pieceClickedCol]===Enums.whiteKnight)){
             movename="Nx"+this.state.squareNames[i][j];
           }
-          else if ((newSquares[pieceClickedRow][pieceClickedCol]===blackQueen)||(newSquares[pieceClickedRow][pieceClickedCol]===whiteQueen)){
+          else if ((newSquares[pieceClickedRow][pieceClickedCol]===Enums.blackQueen)||(newSquares[pieceClickedRow][pieceClickedCol]===Enums.whiteQueen)){
             movename="Qx"+this.state.squareNames[i][j];
           }
-          else if ((newSquares[pieceClickedRow][pieceClickedCol]===blackRook)||(newSquares[pieceClickedRow][pieceClickedCol]===whiteRook)){
+          else if ((newSquares[pieceClickedRow][pieceClickedCol]===Enums.blackRook)||(newSquares[pieceClickedRow][pieceClickedCol]===Enums.whiteRook)){
             movename="Rx"+this.state.squareNames[i][j];
           }
-          else if ((newSquares[pieceClickedRow][pieceClickedCol]===blackPawn)||(newSquares[pieceClickedRow][pieceClickedCol]===whitePawn)){
+          else if ((newSquares[pieceClickedRow][pieceClickedCol]===Enums.blackPawn)||(newSquares[pieceClickedRow][pieceClickedCol]===Enums.whitePawn)){
             movename=this.state.squareNames[pieceClickedRow][pieceClickedCol];
             movename=movename.charAt(0)+"x"+this.state.squareNames[i][j];
           }
@@ -644,22 +644,22 @@ class Game extends React.Component {
 
         if (newMiscSquares[i][j]==="possible"){
           // find out which piece was clicked for naming the move
-          if ((newSquares[pieceClickedRow][pieceClickedCol]===blackKing)||(newSquares[pieceClickedRow][pieceClickedCol]===whiteKing)){
+          if ((newSquares[pieceClickedRow][pieceClickedCol]===Enums.blackKing)||(newSquares[pieceClickedRow][pieceClickedCol]===Enums.whiteKing)){
             movename="K"+this.state.squareNames[i][j];
           }
-          else if ((newSquares[pieceClickedRow][pieceClickedCol]===blackBishop)||(newSquares[pieceClickedRow][pieceClickedCol]===whiteBishop)){
+          else if ((newSquares[pieceClickedRow][pieceClickedCol]===Enums.blackBishop)||(newSquares[pieceClickedRow][pieceClickedCol]===Enums.whiteBishop)){
             movename="B"+this.state.squareNames[i][j];
           }
-          else if ((newSquares[pieceClickedRow][pieceClickedCol]===blackKnight)||(newSquares[pieceClickedRow][pieceClickedCol]===whiteKnight)){
+          else if ((newSquares[pieceClickedRow][pieceClickedCol]===Enums.blackKnight)||(newSquares[pieceClickedRow][pieceClickedCol]===Enums.whiteKnight)){
             movename="N"+this.state.squareNames[i][j];
           }
-          else if ((newSquares[pieceClickedRow][pieceClickedCol]===blackQueen)||(newSquares[pieceClickedRow][pieceClickedCol]===whiteQueen)){
+          else if ((newSquares[pieceClickedRow][pieceClickedCol]===Enums.blackQueen)||(newSquares[pieceClickedRow][pieceClickedCol]===Enums.whiteQueen)){
             movename="Q"+this.state.squareNames[i][j];
           }
-          else if ((newSquares[pieceClickedRow][pieceClickedCol]===blackRook)||(newSquares[pieceClickedRow][pieceClickedCol]===whiteRook)){
+          else if ((newSquares[pieceClickedRow][pieceClickedCol]===Enums.blackRook)||(newSquares[pieceClickedRow][pieceClickedCol]===Enums.whiteRook)){
             movename="R"+this.state.squareNames[i][j];
           }
-          else if ((newSquares[pieceClickedRow][pieceClickedCol]===blackPawn)||(newSquares[pieceClickedRow][pieceClickedCol]===whitePawn)){
+          else if ((newSquares[pieceClickedRow][pieceClickedCol]===Enums.blackPawn)||(newSquares[pieceClickedRow][pieceClickedCol]===Enums.whitePawn)){
             movename=this.state.squareNames[i][j];
           }
         }
@@ -680,8 +680,8 @@ class Game extends React.Component {
 
           for (let i=0; i<8; i++){
             for (let j=0; j<8; j++){
-              if ((whitesTurn && newSquares[i][j]===blackKing) ||
-                  (!whitesTurn && newSquares[i][j]===whiteKing)){
+              if ((whitesTurn && newSquares[i][j]===Enums.blackKing) ||
+                  (!whitesTurn && newSquares[i][j]===Enums.whiteKing)){
                 miscSquares[i][j]="incheck"
               }
             }
@@ -732,7 +732,7 @@ class Game extends React.Component {
           let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
           for (let i=0; i<8; i++){
             for (let j=0; j<8; j++){
-              if (newSquares[i][j]===whiteKing){
+              if (newSquares[i][j]===Enums.whiteKing){
                 miscSquares[i][j]="incheck"
               }
             }
@@ -745,7 +745,7 @@ class Game extends React.Component {
           let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
           for (let i=0; i<8; i++){
             for (let j=0; j<8; j++){
-              if (newSquares[i][j]===blackKing){
+              if (newSquares[i][j]===Enums.blackKing){
                 miscSquares[i][j]="incheck"
               }
             }
@@ -782,8 +782,8 @@ class Game extends React.Component {
         let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
         for (let i=0; i<8; i++){
           for (let j=0; j<8; j++){
-            if (((color==="both"||color==="white") && newSquares[i][j]===whiteKing) ||
-                ((color==="both"||color==="black") && newSquares[i][j]===blackKing)){
+            if (((color==="both"||color==="white") && newSquares[i][j]===Enums.whiteKing) ||
+                ((color==="both"||color==="black") && newSquares[i][j]===Enums.blackKing)){
               miscSquares[i][j]="incheck"
             }
           }
@@ -798,8 +798,8 @@ class Game extends React.Component {
         let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
         for (let i=0; i<8; i++){
           for (let j=0; j<8; j++){
-            if (((color==="both"||color==="white") && newSquares[i][j]===blackKing) ||
-                ((color==="both"||color==="black") && newSquares[i][j]===whiteKing)){
+            if (((color==="both"||color==="white") && newSquares[i][j]===Enums.blackKing) ||
+                ((color==="both"||color==="black") && newSquares[i][j]===Enums.whiteKing)){
               miscSquares[i][j]="incheck"
             }
           }
@@ -864,12 +864,12 @@ class Game extends React.Component {
     let whiteCount = 0;
     let blackCount = 0; 
     whiteTakenPieces.forEach(element => {
-      if (element===whiteQueen || element===whiteRook || element===whitePawn){
+      if (element===Enums.whiteQueen || element===Enums.whiteRook || element===Enums.whitePawn){
         whiteCount++; 
       }
     }); 
     blackTakenPieces.forEach(element => {
-      if (element===blackQueen || element===blackRook || element===blackPawn){
+      if (element===Enums.blackQueen || element===Enums.blackRook || element===Enums.blackPawn){
         blackCount++; 
       }
     }); 
@@ -1186,8 +1186,8 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
   let newSquares;
   let squares_copy;
   playerColor = (playerColor==="both" || playerColor==="white") ? "white" : "black"; 
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackPawn) 
-      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whitePawn)){
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.blackPawn) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whitePawn)){
     return miscSquares; 
   }
 
@@ -1491,8 +1491,8 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
 // Helper function for showing pawn threats for checkThreatenedSquares()
 function displayPawnThreats(currentPieceRow, currentPieceCol, whitesTurn, playerColor, squares) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && (squares[currentPieceRow][currentPieceCol]===blackPawn)) 
-      || (!whitesTurn && (squares[currentPieceRow][currentPieceCol]===whitePawn))){
+  if ((whitesTurn && (squares[currentPieceRow][currentPieceCol]===Enums.blackPawn)) 
+      || (!whitesTurn && (squares[currentPieceRow][currentPieceCol]===Enums.whitePawn))){
     return miscSquares; 
   }
 
@@ -1546,8 +1546,8 @@ function displayPawnThreats(currentPieceRow, currentPieceCol, whitesTurn, player
 // Rooks 
 function displayRookMoves(currentPieceRow, currentPieceCol, whitesTurn, squares, playerColor) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackRook) 
-      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteRook)){
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.blackRook) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whiteRook)){
     return miscSquares; 
   }
   // up "line of sight"
@@ -1564,8 +1564,8 @@ function displayRookMoves(currentPieceRow, currentPieceCol, whitesTurn, squares,
 
 function displayRookThreats(currentPieceRow, currentPieceCol, whitesTurn, squares) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackRook) 
-      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteRook)){
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.blackRook) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whiteRook)){
     return miscSquares; 
   }
   // up "line of sight"
@@ -1583,8 +1583,8 @@ function displayRookThreats(currentPieceRow, currentPieceCol, whitesTurn, square
 // Queens
 function displayQueenMoves(currentPieceRow, currentPieceCol, whitesTurn, squares, playerColor) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackQueen) 
-      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteQueen)){
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.blackQueen) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whiteQueen)){
     return miscSquares; 
   }
   // up "line of sight"
@@ -1609,8 +1609,8 @@ function displayQueenMoves(currentPieceRow, currentPieceCol, whitesTurn, squares
 
 function displayQueenThreats(currentPieceRow, currentPieceCol, whitesTurn, squares) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackQueen) 
-      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteQueen)){
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.blackQueen) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whiteQueen)){
     return miscSquares; 
   }
   // up "line of sight"
@@ -1639,8 +1639,8 @@ function displayKingMoves(currentPieceRow, currentPieceCol, whitesTurn, squares,
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
   let newSquares; 
   let color = (whitesTurn) ? "white" : "black"; 
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackKing) 
-      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteKing)){
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.blackKing) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whiteKing)){
     return miscSquares; 
   }
   let possibleSquares = [];
@@ -1687,8 +1687,8 @@ function displayKingMoves(currentPieceRow, currentPieceCol, whitesTurn, squares,
 // Otherwise code gets stuck in infinite loop checking to make sure each king is not threatening the other. 
 function displayKingThreats(currentPieceRow, currentPieceCol, whitesTurn, squares) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
-  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===blackKing) 
-      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===whiteKing)){
+  if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.blackKing) 
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whiteKing)){
     return miscSquares; 
   }
   let possibleSquares = [];
@@ -1759,27 +1759,27 @@ function checkThreatenedSquares(opponentColor, squares, playerColor){
   if (opponentColor==="Black"){
     for (let i=0; i<8; i++){
       for (let j=0; j<8; j++){
-        if (squares[i][j]===blackPawn){
+        if (squares[i][j]===Enums.blackPawn){
           pieceThreats=displayPawnThreats(i,j,false,playerColor,squares);
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
-        else if (squares[i][j]===blackRook){
+        else if (squares[i][j]===Enums.blackRook){
           pieceThreats=displayRookThreats(i,j,false,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
-        else if (squares[i][j]===blackKnight){
+        else if (squares[i][j]===Enums.blackKnight){
           pieceThreats=displayKnightThreats(i,j,false,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
-        else if (squares[i][j]===blackBishop){
+        else if (squares[i][j]===Enums.blackBishop){
           pieceThreats=displayBishopThreats(i,j,false,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
-        else if (squares[i][j]===blackQueen){
+        else if (squares[i][j]===Enums.blackQueen){
           pieceThreats=displayQueenThreats(i,j,false,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
-        else if (squares[i][j]===blackKing){
+        else if (squares[i][j]===Enums.blackKing){
           pieceThreats=displayKingThreats(i,j,false,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
@@ -1791,27 +1791,27 @@ function checkThreatenedSquares(opponentColor, squares, playerColor){
   else if (opponentColor==="White"){
     for (let i=0; i<8; i++){
       for (let j=0; j<8; j++){
-        if (squares[i][j]===whitePawn){
+        if (squares[i][j]===Enums.whitePawn){
           pieceThreats=displayPawnThreats(i,j,true,playerColor,squares); // for some reason piecethreats is undefined after this line
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
-        else if (squares[i][j]===whiteRook){
+        else if (squares[i][j]===Enums.whiteRook){
           pieceThreats=displayRookThreats(i,j,true,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
-        else if (squares[i][j]===whiteKnight){
+        else if (squares[i][j]===Enums.whiteKnight){
           pieceThreats=displayKnightThreats(i,j,true,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
-        else if (squares[i][j]===whiteBishop){
+        else if (squares[i][j]===Enums.whiteBishop){
           pieceThreats=displayBishopThreats(i,j,true,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
-        else if (squares[i][j]===whiteQueen){
+        else if (squares[i][j]===Enums.whiteQueen){
           pieceThreats=displayQueenThreats(i,j,true,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
-        else if (squares[i][j]===whiteKing){
+        else if (squares[i][j]===Enums.whiteKing){
           pieceThreats=displayKingThreats(i,j,true,squares); 
           allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
         }
@@ -1840,7 +1840,7 @@ function isKingCurrentlyInCheck(kingColor, squares, playerColor){
   if (kingColor==="white") {
     for (let i=0; i<8; i++){
       for (let j=0; j<8; j++){
-        if (squares[i][j]===whiteKing){
+        if (squares[i][j]===Enums.whiteKing){
           allThreatenedSquares = checkThreatenedSquares("Black",squares,playerColor); 
           if (allThreatenedSquares[i][j]==="threatened"){
             return true; 
@@ -1852,7 +1852,7 @@ function isKingCurrentlyInCheck(kingColor, squares, playerColor){
   else if (kingColor==="black"){
     for (let i=0; i<8; i++){
       for (let j=0; j<8; j++){
-        if (squares[i][j]===blackKing){
+        if (squares[i][j]===Enums.blackKing){
           allThreatenedSquares = checkThreatenedSquares("White",squares,playerColor); 
           if (allThreatenedSquares[i][j]==="threatened"){
             return true; 
@@ -1873,27 +1873,27 @@ function isCheckmate(kingColor,squares, pawnColor){
       for (let j=0; j<8; j++){
         if (((kingColor==="both" || kingColor==="white") && whitePieces.includes(squares[i][j])) ||
           ((kingColor==="both" || kingColor==="black") && blackPieces.includes(squares[i][j]))) {
-          if (((kingColor==="both" || kingColor==="white") && squares[i][j]===whiteKnight) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===blackKnight)){
+          if (((kingColor==="both" || kingColor==="white") && squares[i][j]===Enums.whiteKnight) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===Enums.blackKnight)){
             pieceMoves = displayKnightMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
-          if (((kingColor==="both" || kingColor==="white") && squares[i][j]===whitePawn) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===blackPawn)){
+          if (((kingColor==="both" || kingColor==="white") && squares[i][j]===Enums.whitePawn) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===Enums.blackPawn)){
             pieceMoves = displayPawnMoves(i,j,whitesTurn,pawnColor,squares);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
-          if (((kingColor==="both" || kingColor==="white") && squares[i][j]===whiteBishop) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===blackBishop)){
+          if (((kingColor==="both" || kingColor==="white") && squares[i][j]===Enums.whiteBishop) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===Enums.blackBishop)){
             pieceMoves = displayBishopMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
-          if (((kingColor==="both" || kingColor==="white") && squares[i][j]===whiteQueen) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===blackQueen)){
+          if (((kingColor==="both" || kingColor==="white") && squares[i][j]===Enums.whiteQueen) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===Enums.blackQueen)){
             pieceMoves = displayQueenMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
-          if (((kingColor==="both" || kingColor==="white") && squares[i][j]===whiteKing) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===blackKing)){
+          if (((kingColor==="both" || kingColor==="white") && squares[i][j]===Enums.whiteKing) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===Enums.blackKing)){
             pieceMoves = displayKingMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
-          if (((kingColor==="both" || kingColor==="white") && squares[i][j]===whiteRook) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===blackRook)){
+          if (((kingColor==="both" || kingColor==="white") && squares[i][j]===Enums.whiteRook) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===Enums.blackRook)){
             pieceMoves = displayRookMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
@@ -1922,27 +1922,27 @@ function isStalemate(kingColor, squares, pawnColor){
       for (let j=0; j<8; j++){
         if ((whitesTurn && whitePieces.includes(squares[i][j])) ||
           (!whitesTurn && blackPieces.includes(squares[i][j]))) {
-          if ((whitesTurn && squares[i][j]===whiteKnight) || (!whitesTurn && squares[i][j]===blackKnight)){
+          if ((whitesTurn && squares[i][j]===Enums.whiteKnight) || (!whitesTurn && squares[i][j]===Enums.blackKnight)){
             pieceMoves = displayKnightMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
-          if ((whitesTurn && squares[i][j]===whitePawn) || (!whitesTurn && squares[i][j]===blackPawn)){
+          if ((whitesTurn && squares[i][j]===Enums.whitePawn) || (!whitesTurn && squares[i][j]===Enums.blackPawn)){
             pieceMoves = displayPawnMoves(i,j,whitesTurn,pawnColor,squares);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
-          if ((whitesTurn && squares[i][j]===whiteBishop) || (!whitesTurn && squares[i][j]===blackBishop)){
+          if ((whitesTurn && squares[i][j]===Enums.whiteBishop) || (!whitesTurn && squares[i][j]===Enums.blackBishop)){
             pieceMoves = displayBishopMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
-          if ((whitesTurn && squares[i][j]===whiteQueen) || (!whitesTurn && squares[i][j]===blackQueen)){
+          if ((whitesTurn && squares[i][j]===Enums.whiteQueen) || (!whitesTurn && squares[i][j]===Enums.blackQueen)){
             pieceMoves = displayQueenMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
-          if ((whitesTurn && squares[i][j]===whiteKing) || (!whitesTurn && squares[i][j]===blackKing)){
+          if ((whitesTurn && squares[i][j]===Enums.whiteKing) || (!whitesTurn && squares[i][j]===Enums.blackKing)){
             pieceMoves = displayKingMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
-          if ((whitesTurn && squares[i][j]===whiteRook) || (!whitesTurn && squares[i][j]===blackRook)){
+          if ((whitesTurn && squares[i][j]===Enums.whiteRook) || (!whitesTurn && squares[i][j]===Enums.blackRook)){
             pieceMoves = displayRookMoves(i,j,whitesTurn,squares,pawnColor);
             legalMoves = squaresCombiner(pieceMoves, legalMoves); 
           }
@@ -1990,7 +1990,7 @@ function findPieceAndDisplay(pieceRow, pieceCol, whitesTurn, playerColor, square
         // Find the checked king's location and highlight it as "incheck" (bright red)
         for (let i=0; i<8; i++){
           for (let j=0; j<8; j++){
-            if (squares[i][j]===whiteKing){
+            if (squares[i][j]===Enums.whiteKing){
               miscSquares[i][j]="incheck"
             }
           }
@@ -2020,7 +2020,7 @@ function findPieceAndDisplay(pieceRow, pieceCol, whitesTurn, playerColor, square
         // Find the checked king's location and highlight it as "incheck" (bright red)
         for (let i=0; i<8; i++){
           for (let j=0; j<8; j++){
-            if (squares[i][j]===blackKing){
+            if (squares[i][j]===Enums.blackKing){
               miscSquares[i][j]="incheck"
             }
           }
