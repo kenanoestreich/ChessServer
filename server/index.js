@@ -1,5 +1,4 @@
 const app = require('express')();
-const express = require('express');
 const http = require('http').Server(app);
 const mysql = require('mysql');
 //const io = require('socket.io')(http);
