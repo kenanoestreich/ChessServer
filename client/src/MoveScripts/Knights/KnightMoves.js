@@ -8,7 +8,7 @@ import Enums from '../../Enums.js'
 function displayKnightMoves(currentPieceRow, currentPieceCol, whitesTurn, squares) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
   if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.blackKnight) 
-      || !whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whiteKnight){
+      || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whiteKnight)){
     return miscSquares; 
   }
   let possibleSquares = [];
