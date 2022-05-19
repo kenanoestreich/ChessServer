@@ -1,12 +1,17 @@
 import Enums from '../../Enums.js'
+import isKingCurrentlyInCheck from '../../CheckScripts/IsKingCurrentlyInCheck.js';
+import movePiece from '../MovePiece.js';
 
 // ALL THE "display_____Moves" FUNCTIONS DO THE FOLLOWING (ONLY DIFFERENCE IS HOW THAT PIECE MOVES):
 // input current board state and piece location to move and change css for all the 
 // legal move squares to highlight a new color. 
 
 // Knights
-function displayKnightMoves(currentPieceRow, currentPieceCol, whitesTurn, squares) {
+function displayKnightMoves(currentPieceRow, currentPieceCol, whitesTurn, squares, playerColor) {
   let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
+  let kingColor = (whitesTurn) ? "white" : "black"; 
+  let squares_copy;
+  let newSquares; 
   if ((whitesTurn && (squares[currentPieceRow][currentPieceCol]===Enums.blackKnight)) 
       || (!whitesTurn && (squares[currentPieceRow][currentPieceCol]===Enums.whiteKnight))){
     return miscSquares; 
@@ -26,12 +31,22 @@ function displayKnightMoves(currentPieceRow, currentPieceCol, whitesTurn, square
       if ((whitesTurn && Enums.blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
           || (!whitesTurn && Enums.whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="threatened";
+        squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(possibleSquares[i][0],possibleSquares[i][1],currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(kingColor,newSquares,playerColor)){
+          miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]=null; 
+        } 
       }
       else if ((!whitesTurn && Enums.blackPieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]])) 
           || (whitesTurn && Enums.whitePieces.includes(squares[possibleSquares[i][0]][possibleSquares[i][1]]))){
       }
       else {
         miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]="possible";
+        squares_copy = JSON.parse(JSON.stringify(squares)); 
+        newSquares = movePiece(possibleSquares[i][0],possibleSquares[i][1],currentPieceRow,currentPieceCol,squares_copy)
+        if (isKingCurrentlyInCheck(kingColor,newSquares,playerColor)){
+          miscSquares[possibleSquares[i][0]][possibleSquares[i][1]]=null; 
+        } 
       }
     }
   }
