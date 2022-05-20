@@ -33,9 +33,10 @@ let socket = io("http://ec2-184-73-74-122.compute-1.amazonaws.com:3456/");
 let your_color;
 
 // array of roots so we don't get a warning for calling createRoot() multiple times on the same element.
+// TODO: FIX THIS IN GAME'S RENDER()
 let roots=Array(8848).fill(null); // maximum possible number of moves
 
-// Location of piece clicked for the sake of moving pieces
+// Keep tracked of last piece clicked for the sake of moving pieces
 let pieceClickedRow; 
 let pieceClickedCol;
 
