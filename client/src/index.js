@@ -339,7 +339,8 @@ class Game extends React.Component {
         color: this.props.color,
         myTurn: false, 
         myTime: this.props.startTime,
-        theirTime: this.props.startTime
+        theirTime: this.props.startTime,
+        enPassantTarget: null
       }
     }
     else {
@@ -369,7 +370,8 @@ class Game extends React.Component {
         color: this.props.color,
         myTurn: true, 
         myTime: this.props.startTime,
-        theirTime: this.props.startTime
+        theirTime: this.props.startTime,
+        enPassantTarget: null
       };
     }
   }
@@ -405,7 +407,10 @@ class Game extends React.Component {
     let squareNames=JSON.parse(JSON.stringify(this.state.squareNames));
     let squares=JSON.parse(JSON.stringify(history[history.length-1].squares)); 
     let playerColor=this.state.color; 
+    let boardColor = (playerColor==="both") ? "white" : playerColor; 
     let newTakenPieces=JSON.parse(JSON.stringify(this.state.takenPieces)); 
+    let whitesTurn = this.state.whitesTurn;
+    let newEnPassantTarget = Array(2).fill(null); 
     let endpiece;
     let startpiece; 
     let endname;
@@ -458,6 +463,38 @@ class Game extends React.Component {
       else if ((startpiece===Enums.blackPawn)||(startpiece===Enums.whitePawn)){
         movename=startname;
         movename=movename.charAt(0)+"x"+endname; 
+        if (whitesTurn) { // White just moved their piece (we haven't updated whitesTurn yet)
+          if (boardColor==="white"){ // board has white at the bottom
+            if ((endcol===4)&&(startcol===6)){
+              // en passant is possible for black on this turn
+              newEnPassantTarget[0]=endrow; 
+              newEnPassantTarget[1]=endcol; 
+            }
+          }
+          else {
+            if ((endcol===3)&&(startcol===1)){
+              // en passant is possible for black on this turn
+              newEnPassantTarget[0]=endrow; 
+              newEnPassantTarget[1]=endcol; 
+            }
+          }
+        }
+        else { 
+          if (boardColor==="white"){ // board has white at the bottom
+            if ((endcol===3)&&(startcol===1)){
+              // en passant is possible for white on this turn
+              newEnPassantTarget[0]=endrow; 
+              newEnPassantTarget[1]=endcol; 
+            }
+          }
+          else {
+            if ((endcol===4)&&(startcol===6)){
+              // en passant is possible for white on this turn
+              newEnPassantTarget[0]=endrow; 
+              newEnPassantTarget[1]=endcol; 
+            }
+          }
+        }
       }
     }
     // no piece was taken
@@ -480,6 +517,38 @@ class Game extends React.Component {
       }
       else if ((startpiece===Enums.blackPawn)||(startpiece===Enums.whitePawn)){
         movename=endname;
+        if (whitesTurn) { // White just moved their piece (we haven't updated whitesTurn yet)
+          if (boardColor==="white"){ // board has white at the bottom
+            if ((endcol===4)&&(startcol===6)){
+              // en passant is possible for black on this turn
+              newEnPassantTarget[0]=endrow; 
+              newEnPassantTarget[1]=endcol; 
+            }
+          }
+          else {
+            if ((endcol===3)&&(startcol===1)){
+              // en passant is possible for black on this turn
+              newEnPassantTarget[0]=endrow; 
+              newEnPassantTarget[1]=endcol; 
+            }
+          }
+        }
+        else { 
+          if (boardColor==="white"){ // board has white at the bottom
+            if ((endcol===3)&&(startcol===1)){
+              // en passant is possible for white on this turn
+              newEnPassantTarget[0]=endrow; 
+              newEnPassantTarget[1]=endcol; 
+            }
+          }
+          else {
+            if ((endcol===4)&&(startcol===6)){
+              // en passant is possible for white on this turn
+              newEnPassantTarget[0]=endrow; 
+              newEnPassantTarget[1]=endcol; 
+            }
+          }
+        }
       }
     }
     // generate a new board with the piece moved 
@@ -511,7 +580,8 @@ class Game extends React.Component {
         whitesTurn: newTurn,
         stepNumber: newStep,
         miscSquares: miscSquares,
-        takenPieces: newTakenPieces
+        takenPieces: newTakenPieces,
+        enPassantTarget: newEnPassantTarget
       }); 
       return; 
     }
@@ -529,7 +599,8 @@ class Game extends React.Component {
         whitesTurn: newTurn,
         stepNumber: newStep,
         miscSquares: miscSquares,
-        takenPieces: newTakenPieces
+        takenPieces: newTakenPieces,
+        enPassantTarget: newEnPassantTarget
       }) 
       return; 
     }

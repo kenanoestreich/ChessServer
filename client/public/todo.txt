@@ -1,0 +1,9 @@
+List of features I want to implement: 
+
+- En Passant (In progress)
+- Pawn Promotion
+- Castling
+- Timers
+- Separating components to different files
+- Separating socket functions to different files
+- Make it look pretty 
