@@ -463,38 +463,6 @@ class Game extends React.Component {
       else if ((startpiece===Enums.blackPawn)||(startpiece===Enums.whitePawn)){
         movename=startname;
         movename=movename.charAt(0)+"x"+endname; 
-        if (whitesTurn) { // White just moved their piece (we haven't updated whitesTurn yet)
-          if (boardColor==="white"){ // board has white at the bottom
-            if ((endcol===4)&&(startcol===6)){
-              // en passant is possible for black on this turn
-              newEnPassantTarget[0]=endrow; 
-              newEnPassantTarget[1]=endcol; 
-            }
-          }
-          else {
-            if ((endcol===3)&&(startcol===1)){
-              // en passant is possible for black on this turn
-              newEnPassantTarget[0]=endrow; 
-              newEnPassantTarget[1]=endcol; 
-            }
-          }
-        }
-        else { 
-          if (boardColor==="white"){ // board has white at the bottom
-            if ((endcol===3)&&(startcol===1)){
-              // en passant is possible for white on this turn
-              newEnPassantTarget[0]=endrow; 
-              newEnPassantTarget[1]=endcol; 
-            }
-          }
-          else {
-            if ((endcol===4)&&(startcol===6)){
-              // en passant is possible for white on this turn
-              newEnPassantTarget[0]=endrow; 
-              newEnPassantTarget[1]=endcol; 
-            }
-          }
-        }
       }
     }
     // no piece was taken
@@ -522,14 +490,14 @@ class Game extends React.Component {
             if ((endcol===4)&&(startcol===6)){
               // en passant is possible for black on this turn
               newEnPassantTarget[0]=endrow; 
-              newEnPassantTarget[1]=endcol; 
+              newEnPassantTarget[1]=endcol+1; 
             }
           }
           else {
             if ((endcol===3)&&(startcol===1)){
               // en passant is possible for black on this turn
               newEnPassantTarget[0]=endrow; 
-              newEnPassantTarget[1]=endcol; 
+              newEnPassantTarget[1]=endcol-1; 
             }
           }
         }
@@ -538,14 +506,14 @@ class Game extends React.Component {
             if ((endcol===3)&&(startcol===1)){
               // en passant is possible for white on this turn
               newEnPassantTarget[0]=endrow; 
-              newEnPassantTarget[1]=endcol; 
+              newEnPassantTarget[1]=endcol-1; 
             }
           }
           else {
             if ((endcol===4)&&(startcol===6)){
               // en passant is possible for white on this turn
               newEnPassantTarget[0]=endrow; 
-              newEnPassantTarget[1]=endcol; 
+              newEnPassantTarget[1]=endcol+1; 
             }
           }
         }
@@ -622,6 +590,7 @@ class Game extends React.Component {
     let squareNames = JSON.parse(JSON.stringify(this.state.squareNames)); 
     console.log(name); 
     let movename; 
+    let enPassantTarget = this.state.enPassantTarget; 
 
     // If not at the most recent move, move to the most recent move
     if (this.state.stepNumber!==history.length-1){
@@ -791,7 +760,7 @@ class Game extends React.Component {
         // All the following sections refer to clicking one of the current player's pieces on their turn. 
         // The square labels should be updated in this case, but nothing should be moved. 
         let tempColor = (this.state.color!=="both") ? this.state.color : "white"; 
-        let miscSquares = findPieceAndDisplay(i,j,whitesTurn,tempColor,newSquares); 
+        let miscSquares = findPieceAndDisplay(i,j,whitesTurn,tempColor,newSquares,enPassantTarget); 
         if (miscSquares!==null){
           this.setState({
             miscSquares: miscSquares
@@ -856,7 +825,7 @@ class Game extends React.Component {
     color = (color!=="both") ? this.state.color : "white";
     let opponentColor = (color==="white") ? "black" : "white";
     //check if either king is in check and highlight if so 
-    if (step===this.state.history.length-1){
+    if (step===(history.length-1)){
       if (isKingCurrentlyInCheck(color,newSquares,color)){
         let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null)); 
         for (let i=0; i<8; i++){

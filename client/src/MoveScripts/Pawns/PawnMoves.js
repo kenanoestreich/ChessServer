@@ -3,7 +3,7 @@ import movePiece from "../MovePiece";
 import isKingCurrentlyInCheck from "../../CheckScripts/IsKingCurrentlyInCheck";
 
 // Pawns
-function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerColor, squares) {
+function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerColor, squares, enPassantTarget) {
     let miscSquares = Array(8).fill(null).map(()=>Array(8).fill(null));
     let newSquares;
     let squares_copy;
@@ -159,6 +159,10 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       miscSquares[currentPieceRow][currentPieceCol]="selected";
+      // Account for en passant
+      if (enPassantTarget[0]!==null){
+        miscSquares[enPassantTarget[0]][enPassantTarget[1]]="threatened"
+      }
       return miscSquares; 
     }
     else if (playerColor==="black"){

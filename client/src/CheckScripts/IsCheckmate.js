@@ -8,7 +8,7 @@ import displayRookMoves from "../MoveScripts/Rooks/RookMoves";
 import squaresCombiner from "../HelperScripts/SquaresCombiner";
 import isKingCurrentlyInCheck from "./IsKingCurrentlyInCheck";
 
-function isCheckmate(kingColor,squares, pawnColor){
+function isCheckmate(kingColor,squares, pawnColor, enPassantTarget){
     let legalMoves = Array(8).fill(null).map(()=>Array(8).fill(null));
     let pieceMoves;   
     let whitesTurn = (kingColor==="white") ? true : false; 
@@ -22,7 +22,7 @@ function isCheckmate(kingColor,squares, pawnColor){
               legalMoves = squaresCombiner(pieceMoves, legalMoves); 
             }
             if (((kingColor==="both" || kingColor==="white") && squares[i][j]===Enums.whitePawn) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===Enums.blackPawn)){
-              pieceMoves = displayPawnMoves(i,j,whitesTurn,pawnColor,squares);
+              pieceMoves = displayPawnMoves(i,j,whitesTurn,pawnColor,squares, enPassantTarget);
               legalMoves = squaresCombiner(pieceMoves, legalMoves); 
             }
             if (((kingColor==="both" || kingColor==="white") && squares[i][j]===Enums.whiteBishop) || ((kingColor==="both" || kingColor==="black") && squares[i][j]===Enums.blackBishop)){

@@ -10,7 +10,7 @@ import Enums from "../Enums";
 // function to determine clicked piece and call the correct display function
 
 // King, Queen, Rook, Bishop, Knight, Pawn
-function findPieceAndDisplay(pieceRow, pieceCol, whitesTurn, playerColor, squares) {
+function findPieceAndDisplay(pieceRow, pieceCol, whitesTurn, playerColor, squares, enPassantTarget) {
     for (let i=0; i<6; i++){
       if (squares[pieceRow][pieceCol]===Enums.whitePieces[i] || squares[pieceRow][pieceCol]===Enums.blackPieces[i]) {
         if (isKingCurrentlyInCheck("white",squares, playerColor)){
@@ -31,7 +31,7 @@ function findPieceAndDisplay(pieceRow, pieceCol, whitesTurn, playerColor, square
             miscSquares = displayKnightMoves(pieceRow,pieceCol,whitesTurn,squares, playerColor); 
           }
           if (i===5){
-            miscSquares = displayPawnMoves(pieceRow,pieceCol,whitesTurn,playerColor,squares); 
+            miscSquares = displayPawnMoves(pieceRow,pieceCol,whitesTurn,playerColor,squares, enPassantTarget); 
           }
           // Find the checked king's location and highlight it as "incheck" (bright red)
           for (let i=0; i<8; i++){
@@ -61,7 +61,7 @@ function findPieceAndDisplay(pieceRow, pieceCol, whitesTurn, playerColor, square
             miscSquares = displayKnightMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor); 
           }
           if (i===5){
-            miscSquares = displayPawnMoves(pieceRow,pieceCol,whitesTurn,playerColor,squares); 
+            miscSquares = displayPawnMoves(pieceRow,pieceCol,whitesTurn,playerColor,squares, enPassantTarget); 
           }
           // Find the checked king's location and highlight it as "incheck" (bright red)
           for (let i=0; i<8; i++){
@@ -90,7 +90,7 @@ function findPieceAndDisplay(pieceRow, pieceCol, whitesTurn, playerColor, square
             return displayKnightMoves(pieceRow,pieceCol,whitesTurn,squares,playerColor);
           }
           if (i===5){
-            return displayPawnMoves(pieceRow,pieceCol,whitesTurn,playerColor,squares);
+            return displayPawnMoves(pieceRow,pieceCol,whitesTurn,playerColor,squares, enPassantTarget);
           }
         }
       }
