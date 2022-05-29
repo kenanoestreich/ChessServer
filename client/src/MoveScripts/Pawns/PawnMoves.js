@@ -161,7 +161,9 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
       miscSquares[currentPieceRow][currentPieceCol]="selected";
       // Account for en passant
       if (enPassantTarget[0]!==null){
-        miscSquares[enPassantTarget[0]][enPassantTarget[1]]="threatened"
+        if ((currentPieceRow===3)&&(Math.abs((currentPieceCol-enPassantTarget[1]))===1)){
+          miscSquares[enPassantTarget[0]][enPassantTarget[1]]="threatened"
+        }
       }
       return miscSquares; 
     }
@@ -310,6 +312,12 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
         }
       }
       miscSquares[currentPieceRow][currentPieceCol]="selected";
+      // Account for en passant
+      if (enPassantTarget[0]!==null){
+        if ((currentPieceRow===3)&&(Math.abs((currentPieceCol-enPassantTarget[1]))===1)){
+          miscSquares[enPassantTarget[0]][enPassantTarget[1]]="threatened"
+        }
+      }
       return miscSquares; 
     }
 }

@@ -58,6 +58,12 @@ function Square(props) {
 
 // Board Class 
 // 64 Squares of chess board 
+// ---------------------------------------------------------------------------------
+
+// Functions: 
+
+// renderSquare() - creates a square object
+// render() - renders the whole board
 class Board extends React.Component {
 
   // renderSquare() generates the square objects and assigns props based on inputs
@@ -306,9 +312,28 @@ class Board extends React.Component {
   }
 }
 
-// Game Class; Contains state variables for history, stepNumber (move #), 
-// miscSquares (strings of "threatened", "possible", etc...), whitesTurn (is it White's turn?), 
-// list of black's and white's lost pieces
+// Game Class
+// Highest level structure for playing the game
+// --------------------------------------------------------------------------------------------
+// State variables: 
+
+// history (array of board states for each move), 
+// squareNames (notation of squares),
+// miscSquares (strings of "threatened", "possible", etc...), 
+// stepNumber (move #), whitesTurn (is it White's turn?),
+// takenPieces (list of black's and white's lost pieces), 
+// color (color of player (white, black, or both)),
+// myTurn (bool for keeping track of timer switches), 
+// myTime (time on my clock), 
+// theirTime (time on opponent's clock), 
+// enPassantTarget (is EnPassant possible on this move? either [null, null] or something like [2,0] as in [row,col] of square where the pawn would land after en Passant)
+
+// Functions: 
+
+// componentDidMount() - Built-in React function for all components. Called after component and any child components have mounted. Good place to store socket.on's 
+// finishGame() - 
+
+// ---------------------------------------------------------------------------------------------
 class Game extends React.Component {
   constructor(props) {
     super(props);
@@ -378,26 +403,40 @@ class Game extends React.Component {
 
   componentDidMount(){
     socket.on("OpponentMoved", (data) => this.opponentMoved(data["startSquare"],data["endSquare"]));
+    socket.on("ReceiveRecord", function(data){
+      console.log(JSON.stringify(data));  
+      root.render(
+        <div>
+          <LobbyPage 
+            wins={data["wins"]} 
+            losses={data["losses"]}
+          />
+          <br></br>
+          <h2>Practice While You Wait</h2> 
+          <Game color="both"/>
+        </div>
+      );
+    });
   }
 
   finishGame(result){
     socket.emit(result,{username: sessionStorage.getItem("currentUser")}); // either "WonGame" or "LostGame"
     setTimeout((function(){
       socket.emit("FetchRecord", {username: sessionStorage.getItem("currentUser")});
-      socket.on("ReceiveRecord", function(data){
-        console.log(JSON.stringify(data));  
-        root.render(
-          <div>
-            <LobbyPage 
-              wins={data["wins"]} 
-              losses={data["losses"]}
-            />
-            <br></br>
-            <h2>Practice While You Wait</h2> 
-            <Game color="both"/>
-          </div>
-        );
-      });
+      // socket.on("ReceiveRecord", function(data){
+      //   console.log(JSON.stringify(data));  
+      //   root.render(
+      //     <div>
+      //       <LobbyPage 
+      //         wins={data["wins"]} 
+      //         losses={data["losses"]}
+      //       />
+      //       <br></br>
+      //       <h2>Practice While You Wait</h2> 
+      //       <Game color="both"/>
+      //     </div>
+      //   );
+      // });
     }),300);
   }
 
@@ -487,33 +526,33 @@ class Game extends React.Component {
         movename=endname;
         if (whitesTurn) { // White just moved their piece (we haven't updated whitesTurn yet)
           if (boardColor==="white"){ // board has white at the bottom
-            if ((endcol===4)&&(startcol===6)){
+            if ((endrow===4)&&(startrow===6)){
               // en passant is possible for black on this turn
-              newEnPassantTarget[0]=endrow; 
-              newEnPassantTarget[1]=endcol+1; 
+              newEnPassantTarget[0]=endrow-1; 
+              newEnPassantTarget[1]=endcol; 
             }
           }
           else {
-            if ((endcol===3)&&(startcol===1)){
+            if ((endrow===3)&&(startrow===1)){
               // en passant is possible for black on this turn
-              newEnPassantTarget[0]=endrow; 
-              newEnPassantTarget[1]=endcol-1; 
+              newEnPassantTarget[0]=endrow-1; 
+              newEnPassantTarget[1]=endcol; 
             }
           }
         }
         else { 
           if (boardColor==="white"){ // board has white at the bottom
-            if ((endcol===3)&&(startcol===1)){
+            if ((endrow===3)&&(startrow===1)){
               // en passant is possible for white on this turn
-              newEnPassantTarget[0]=endrow; 
-              newEnPassantTarget[1]=endcol-1; 
+              newEnPassantTarget[0]=endrow-1; 
+              newEnPassantTarget[1]=endcol; 
             }
           }
           else {
-            if ((endcol===4)&&(startcol===6)){
+            if ((endrow===4)&&(startrow===6)){
               // en passant is possible for white on this turn
-              newEnPassantTarget[0]=endrow; 
-              newEnPassantTarget[1]=endcol+1; 
+              newEnPassantTarget[0]=endrow+1; 
+              newEnPassantTarget[1]=endcol; 
             }
           }
         }
