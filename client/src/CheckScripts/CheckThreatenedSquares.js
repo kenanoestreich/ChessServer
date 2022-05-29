@@ -49,7 +49,7 @@ function checkThreatenedSquares(opponentColor, squares, playerColor){
       for (let i=0; i<8; i++){
         for (let j=0; j<8; j++){
           if (squares[i][j]===Enums.whitePawn){
-            pieceThreats=displayPawnThreats(i,j,true,playerColor,squares); // for some reason piecethreats is undefined after this line
+            pieceThreats=displayPawnThreats(i,j,true,playerColor,squares); 
             allThreatenedSquares=squaresCombiner(pieceThreats,allThreatenedSquares); 
           }
           else if (squares[i][j]===Enums.whiteRook){

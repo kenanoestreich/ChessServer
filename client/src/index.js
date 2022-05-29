@@ -340,7 +340,7 @@ class Game extends React.Component {
         myTurn: false, 
         myTime: this.props.startTime,
         theirTime: this.props.startTime,
-        enPassantTarget: null
+        enPassantTarget: Array(2).fill(null)
       }
     }
     else {
@@ -371,7 +371,7 @@ class Game extends React.Component {
         myTurn: true, 
         myTime: this.props.startTime,
         theirTime: this.props.startTime,
-        enPassantTarget: null
+        enPassantTarget: Array(2).fill(null)
       };
     }
   }
@@ -633,7 +633,7 @@ class Game extends React.Component {
 
     let pawnColor = (this.state.color !== "both") ? this.state.color : "white"; 
     // If the game is Drawn by Stalemate or done by Checkmate, don't respond to clicks. 
-    if (isCheckmate("white",newSquares,pawnColor)||isStalemate("white", newSquares,pawnColor)||(isCheckmate("black",newSquares,pawnColor)||isStalemate("black",newSquares,pawnColor))){
+    if (isCheckmate("white",newSquares,pawnColor,enPassantTarget)||isStalemate("white", newSquares,pawnColor,enPassantTarget)||(isCheckmate("black",newSquares,pawnColor,enPassantTarget)||isStalemate("black",newSquares,pawnColor,enPassantTarget))){
       console.log("Checkmate or Stalemate")
       return; 
     }
@@ -874,6 +874,7 @@ class Game extends React.Component {
     const current = history[this.state.stepNumber];
     const newMiscSquares = JSON.parse(JSON.stringify(this.state.miscSquares));
     const newSquares = current.squares;
+    const enPassantTarget = this.state.enPassantTarget; 
     const moves = history.map((step, move) => {
       if (move!==0){
         if (move%2===1) { //white's move most recent
@@ -926,7 +927,7 @@ class Game extends React.Component {
     let status; 
     let myColor = (this.state.color!=="both") ? this.state.color : "white";
     let opponentColor = (myColor==="white") ? "black" : "white"; 
-    if (isCheckmate(myColor,current.squares,myColor)){
+    if (isCheckmate(myColor,current.squares,myColor,enPassantTarget)){
       status = ((myColor==="white") ? "Black" : "White") + " Won By Checkmate!";
       finishButton = ["LostGame"].map(()=>{
         return(
@@ -934,7 +935,7 @@ class Game extends React.Component {
         );
       }); 
     }
-    else if (isCheckmate(opponentColor, current.squares,myColor)){
+    else if (isCheckmate(opponentColor, current.squares,myColor,enPassantTarget)){
       status = ((myColor==="white") ? "White" : "Black") + " Won By Checkmate!";
       finishButton = ["WonGame"].map(()=>{
         return(
@@ -942,10 +943,10 @@ class Game extends React.Component {
         );
       }); 
     }
-    else if (isStalemate(myColor, current.squares,myColor)){
+    else if (isStalemate(myColor, current.squares,myColor,enPassantTarget)){
       status = "Game Drawn By Stalemate";
     }
-    else if (isStalemate(opponentColor, current.squares, myColor)){
+    else if (isStalemate(opponentColor, current.squares, myColor, enPassantTarget)){
       status = "Game Drawn By Stalemate"; 
     }
     else if (whiteTakenPieces.length>=14 && blackTakenPieces.length>=14){

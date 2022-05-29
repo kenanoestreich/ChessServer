@@ -43,7 +43,7 @@ class Timer extends React.Component {
     let time = this.state.time; 
     return (
       <div className="app">
-        <div classname="time">
+        <div className="time">
           {Math.floor(time/60)}m{time%60}s
         </div>
         <div id="switch">
