@@ -3,6 +3,7 @@ List of features I want to implement:
 - En Passant (In progress)
     - Make the piece actually get taken and reflect that in the move name
 - Pawn Promotion
+- Clean up PawnMoves
 - Castling
 - Timers
 - Separating components to different files

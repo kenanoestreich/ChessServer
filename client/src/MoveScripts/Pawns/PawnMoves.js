@@ -8,6 +8,17 @@ function displayPawnMoves(currentPieceRow, currentPieceCol, whitesTurn, playerCo
     let newSquares;
     let squares_copy;
     playerColor = (playerColor==="both" || playerColor==="white") ? "white" : "black"; 
+    let whitePawnDirection = (playerColor==="white" || playerColor==="black") ? -1 : 1;
+    let blackPawnDirection = (whitePawnDirection===-1) ? 1 : -1;  
+    let isFirstMove = false; 
+    if  (
+          (whitesTurn && (whitePawnDirection===-1) && (currentPieceRow===6)) ||
+          (whitesTurn && (whitePawnDirection===+1) && (currentPieceRow===1)) ||
+          (!whitesTurn && (blackPawnDirection===-1) && (currentPieceRow===6)) ||
+          (!whitesTurn && (blackPawnDirection===+1) && (currentPieceRow===1))
+        ) {
+      isFirstMove = true;  
+    }
     if ((whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.blackPawn) 
         || (!whitesTurn && squares[currentPieceRow][currentPieceCol]===Enums.whitePawn)){
       return miscSquares; 
