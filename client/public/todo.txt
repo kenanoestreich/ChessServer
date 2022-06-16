@@ -10,3 +10,5 @@ List of features I want to implement:
 - Make it look pretty 
 - Make sure each client can only be in one waiting room at a time
 - Fix not detecting checkmate for player who checkmates
+- Make the site always be running on the server
+- Fix the history buttons display for the white player

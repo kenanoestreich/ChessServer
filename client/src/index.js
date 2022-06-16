@@ -659,7 +659,8 @@ class Game extends React.Component {
       return;
     }
 
-    let pawnColor = (this.state.color !== "both") ? this.state.color : "white"; 
+    let pawnColor = (playerColor !== "both") ? playerColor : "white"; 
+
     // If the game is Drawn by Stalemate or done by Checkmate, don't respond to clicks. 
     if (isCheckmate("white",newSquares,pawnColor,enPassantTarget)||isStalemate("white", newSquares,pawnColor,enPassantTarget)||(isCheckmate("black",newSquares,pawnColor,enPassantTarget)||isStalemate("black",newSquares,pawnColor,enPassantTarget))){
       console.log("Checkmate or Stalemate")
@@ -669,13 +670,15 @@ class Game extends React.Component {
     // if the piece is taking another piece, we need to update the list of taken pieces
     if (newMiscSquares[i][j]==="threatened"){
       let takenPiece = newSquares[i][j];
-      if (playerColor==="white"){
+      if (takenPiece===null) { // en passant in this case
+      }
+      if (whitesTurn){
         newTakenPieces.black.push(takenPiece);
         this.setState({
           takenPieces: newTakenPieces
         })
       }
-      else if (playerColor==="black"){
+      else {
         newTakenPieces.white.push(takenPiece);
         this.setState({
           takenPieces: newTakenPieces
@@ -715,6 +718,10 @@ class Game extends React.Component {
           else if ((newSquares[pieceClickedRow][pieceClickedCol]===Enums.blackPawn)||(newSquares[pieceClickedRow][pieceClickedCol]===Enums.whitePawn)){
             movename=this.state.squareNames[pieceClickedRow][pieceClickedCol];
             movename=movename.charAt(0)+"x"+this.state.squareNames[i][j];
+          }
+          else { // en passant in this case
+            movename=this.state.squareNames[pieceClickedRow][pieceClickedCol]; 
+            movename=movename.charAt(0)+"x"+this.state.squareNames[i][j]; 
           }
         }
 
