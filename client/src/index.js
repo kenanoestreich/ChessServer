@@ -331,7 +331,10 @@ class Board extends React.Component {
 // Functions: 
 
 // componentDidMount() - Built-in React function for all components. Called after component and any child components have mounted. Good place to store socket.on's 
-// finishGame() - 
+// finishGame() - Send Game results to that game's socket.
+// opponentMoved() - Update board when opponent makes a move in a multiplayer game. 
+// handleClick() - Called whenever the user clicks a square. Determines if possible moves should be displayed or if a possible move was chosen. 
+// jumpTo() - Update board when the user clicks a history button. 
 
 // ---------------------------------------------------------------------------------------------
 class Game extends React.Component {
@@ -423,20 +426,6 @@ class Game extends React.Component {
     socket.emit(result,{username: sessionStorage.getItem("currentUser")}); // either "WonGame" or "LostGame"
     setTimeout((function(){
       socket.emit("FetchRecord", {username: sessionStorage.getItem("currentUser")});
-      // socket.on("ReceiveRecord", function(data){
-      //   console.log(JSON.stringify(data));  
-      //   root.render(
-      //     <div>
-      //       <LobbyPage 
-      //         wins={data["wins"]} 
-      //         losses={data["losses"]}
-      //       />
-      //       <br></br>
-      //       <h2>Practice While You Wait</h2> 
-      //       <Game color="both"/>
-      //     </div>
-      //   );
-      // });
     }),300);
   }
 
@@ -540,7 +529,7 @@ class Game extends React.Component {
             }
           }
         }
-        else { 
+        else {  // Black just moved their piece 
           if (boardColor==="white"){ // board has white at the bottom
             if ((endrow===3)&&(startrow===1)){
               // en passant is possible for white on this turn
