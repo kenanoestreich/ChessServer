@@ -659,10 +659,10 @@ class Game extends React.Component {
       return;
     }
 
-    let pawnColor = (playerColor !== "both") ? playerColor : "white"; 
+    let boardOrientation = (playerColor !== "both") ? playerColor : "white"; // which pieces are on the bottom? 
 
     // If the game is Drawn by Stalemate or done by Checkmate, don't respond to clicks. 
-    if (isCheckmate("white",newSquares,pawnColor,enPassantTarget)||isStalemate("white", newSquares,pawnColor,enPassantTarget)||(isCheckmate("black",newSquares,pawnColor,enPassantTarget)||isStalemate("black",newSquares,pawnColor,enPassantTarget))){
+    if (isCheckmate("white",newSquares,boardOrientation,enPassantTarget)||isStalemate("white", newSquares,boardOrientation,enPassantTarget)||(isCheckmate("black",newSquares,boardOrientation,enPassantTarget)||isStalemate("black",newSquares,boardOrientation,enPassantTarget))){
       console.log("Checkmate or Stalemate")
       return; 
     }
@@ -671,7 +671,26 @@ class Game extends React.Component {
     if (newMiscSquares[i][j]==="threatened"){
       let takenPiece = newSquares[i][j];
       if (takenPiece===null) { // en passant in this case
+        if (whitesTurn) {
+          takenPiece = Enums.blackPawn; 
+          if (boardOrientation==="black"){
+            newSquares[i-1][j]=null; 
+          }
+          else{
+            newSquares[i+1][j]=null; 
+          }
+        }
+        else {
+          takenPiece = Enums.whitePawn; 
+          if (boardOrientation==="black"){
+            newSquares[i+1][j]=null; 
+          }
+          else{
+            newSquares[i-1][j]=null;
+          }
+        }
       }
+
       if (whitesTurn){
         newTakenPieces.black.push(takenPiece);
         this.setState({
