@@ -708,7 +708,7 @@ class Game extends React.Component {
     // Everything below here should only occur if it's the current player's turn (or single player):
     if ((playerColor==="white" && whitesTurn) ||
         (playerColor==="black" && !whitesTurn) || 
-        (playerColor==="both")){
+        (playerColor==="both")) {
       
         // If the clicked square was highlighted as "threatened" (light red) or "possible" (light yellow),
         // then we know the last piece we clicked can move there. The square wouldn't be highlighted if it 
@@ -763,6 +763,21 @@ class Game extends React.Component {
           }
           else if ((newSquares[pieceClickedRow][pieceClickedCol]===Enums.blackPawn)||(newSquares[pieceClickedRow][pieceClickedCol]===Enums.whitePawn)){
             movename=this.state.squareNames[i][j];
+            // check for en passant for singleplayer
+            if (playerColor==="both"){
+              if (whitesTurn&&(pieceClickedRow===1)&&(i===3)){
+                enPassantTarget[0]=2; 
+                enPassantTarget[1]=pieceClickedCol; 
+              }
+              else if (!whitesTurn&&(pieceClickedRow===6)&&(i===4)){
+                enPassantTarget[0]=5; 
+                enPassantTarget[1]=pieceClickedCol; 
+              }
+              else {
+                enPassantTarget[0]=null; 
+                enPassantTarget[1]=null; 
+              }
+            }
           }
         }
 
@@ -804,6 +819,7 @@ class Game extends React.Component {
           whitesTurn: newTurn,
           stepNumber: newStep,
           miscSquares: miscSquares,
+          enPassantTarget: enPassantTarget
         })
 
         return; 

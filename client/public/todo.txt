@@ -1,5 +1,6 @@
 List of features I want to implement: 
 
+- En Passant for single player
 - Pawn Promotion
 - Castling
 - Timers
